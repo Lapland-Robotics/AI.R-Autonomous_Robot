@@ -6,6 +6,7 @@ import logging
 import rclpy
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy
 
 from std_msgs.msg import String
 
@@ -24,8 +25,8 @@ class PowerMonitorNode(Node):
         fh = logging.FileHandler(log_file, mode='a')
         fh.setFormatter(logging.Formatter('%(asctime)s  %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
         self.file_logger.addHandler(fh)
-
-        self.subscription = self.create_subscription(String, '/power_board/state', self.listener_callback, 10)
+        qos_profile = QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
+        self.subscription = self.create_subscription(String, '/power_board/state', self.listener_callback, qos_profile)
 
 
     def listener_callback(self, msg):
