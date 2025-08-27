@@ -22,7 +22,7 @@
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
 void errorLoop();
-void stringPublisher(char final_string[128]);
+bool safePublish(rcl_publisher_t* publisher, void* msg, const char* publisher_name);
 void publishData(rcl_timer_t * timer, int64_t last_call_time);
 void microrosInit();
 void microrosCleanup();
