@@ -86,7 +86,7 @@ void publishData(rcl_timer_t * timer, int64_t last_call_time){
   float temperature = readTemperature();
 
   snprintf(final_string, sizeof(final_string),
-         "ACS_Current=%.2fA, Temp=%.2fC",
+         "ACS_Current=%.2fA, Temp=%.2fC\n",
          currentACS, temperature);
 
   // read INA219 sensors datas
@@ -98,10 +98,42 @@ void publishData(rcl_timer_t * timer, int64_t last_call_time){
     float loadV = busV + (shuntmV / 1000);
 
     char buffer[128];
-    snprintf(buffer, sizeof(buffer),
-             ", S%d_BusV=%.2fV, S%d_Current=%.2fmA, S%d_Power=%.2fmW",
-             i, busV, i, current, i, power);
-
+    String nameLabel;
+    String values;
+    switch (i)
+    {
+    case 0:
+      nameLabel = "Ouster Lidar: ";
+      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
+      break;
+    case 1:
+      nameLabel = "Jetson: ";
+      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
+      break;
+    case 2:
+      // +16V not used
+      nameLabel = "";
+      values = "";
+      break;
+    case 3:
+      nameLabel = "Router: ";
+      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
+      break;
+    case 4:
+      nameLabel = "Lights: ";
+      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
+      break;
+    case 5:
+      // +5V not used
+      nameLabel = "";
+      values = "";
+      break;
+    default:
+      nameLabel = "";
+      values = "";
+      break;
+    }
+    snprintf(buffer, sizeof(buffer), "%s%s", nameLabel.c_str(), values.c_str());
     strncat(final_string, buffer, sizeof(final_string) - strlen(final_string) - 1);
   }
 
