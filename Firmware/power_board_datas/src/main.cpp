@@ -68,10 +68,18 @@ void errorLoop() {
   }
 }  
 
-void stringPublisher(char final_string[128]) {
-  snprintf(dataMsg.data.data, dataMsg.data.capacity, "[POWER BOARD]: %s", final_string);
-  dataMsg.data.size = strlen(dataMsg.data.data);
-  RCSOFTCHECK(rcl_publish(&dataPublisher, &dataMsg, NULL));
+bool safePublish(rcl_publisher_t* publisher, void* msg, const char* publisher_name) {
+  rcl_ret_t rc = rcl_publish(publisher, msg, NULL);
+  if (rc != RCL_RET_OK) {
+    safeRetryCount++;
+    delay(100);
+    if (safeRetryCount > 3) {
+      ESP.restart();
+    }
+    return false;
+  }
+  safeRetryCount = 0;  // Reset retry count on success
+  return true;
 }
 
 void publishData(rcl_timer_t * timer, int64_t last_call_time){
@@ -86,7 +94,7 @@ void publishData(rcl_timer_t * timer, int64_t last_call_time){
   float temperature = readTemperature();
 
   snprintf(final_string, sizeof(final_string),
-         "ACS_Current=%.2fA, Temp=%.2fC\n",
+         "[POWER BOARD]: Total Current=%.2fA, Temp=%.2fC\n",
          currentACS, temperature);
 
   // read INA219 sensors datas
@@ -137,7 +145,9 @@ void publishData(rcl_timer_t * timer, int64_t last_call_time){
     strncat(final_string, buffer, sizeof(final_string) - strlen(final_string) - 1);
   }
 
-  stringPublisher(final_string);
+  snprintf(dataMsg.data.data, dataMsg.data.capacity, "%s", final_string);
+  dataMsg.data.size = strlen(dataMsg.data.data);
+  safePublish(&dataPublisher, &dataMsg, "dataPublisher");
 }
 
 void microrosInit(){
