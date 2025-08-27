@@ -82,8 +82,8 @@ double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
 }
 
 void microrosInit(){
-  
-  set_microros_serial_transports(Serial); // microros over serial
+  // set_microros_serial_transports(Serial); // microros over serial
+  set_microros_wifi_transports(WIFI_SSID, WIFI_PASSWORD, agent_ip, agent_port); // microros over wifi
   allocator = rcl_get_default_allocator();
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
   RCCHECK(rclc_node_init_default(&node, "micro_ros_gnss_node", "", &support));
@@ -123,7 +123,7 @@ void nTripInit(){
   myGNSS.setNavigationFrequency(1);  //Set output in Hz.
 
   debug("Connecting to local WiFi...");
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     debug(".");

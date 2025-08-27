@@ -52,6 +52,7 @@ jobs:
           - Firmware/GNSS/zedf9p_esp32
           - Firmware/Trigger
           - Firmware/Ultrasonic
+          - Firmware/power_board_datas
 
     steps:
       - uses: actions/checkout@v4

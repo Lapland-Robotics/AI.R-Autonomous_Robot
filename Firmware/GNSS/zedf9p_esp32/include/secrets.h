@@ -1,6 +1,8 @@
 //Your WiFi credentials
-const char ssid[] = "";
-const char password[] =  "";
+char WIFI_SSID[] = "Snower-2.4GHz";
+char WIFI_PASSWORD[] = "";
+IPAddress agent_ip(192, 168, 1, 26);
+size_t agent_port = 8889;
 
 //RTK2Go works well and is free
 const char casterHost[] = "rtk2go.com"; 
