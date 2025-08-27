@@ -25,7 +25,7 @@ class PowerMonitorNode(Node):
         fh = logging.FileHandler(log_file, mode='a')
         fh.setFormatter(logging.Formatter('%(asctime)s  %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
         self.file_logger.addHandler(fh)
-        qos_profile = QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
+        qos_profile = QoSProfile(depth=10, reliability=ReliabilityPolicy.SYSTEM_DEFAULT)
         self.subscription = self.create_subscription(String, '/power_board/state', self.listener_callback, qos_profile)
 
 
