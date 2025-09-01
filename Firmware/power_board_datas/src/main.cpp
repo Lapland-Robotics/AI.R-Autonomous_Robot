@@ -8,13 +8,13 @@
 #include <rclc/executor.h>
 #include <rclc/timer.h>
 #include <Arduino.h>
+#include "rosidl_runtime_c/string.h"
+#include "rosidl_runtime_c/string_functions.h"
 
 #include "wifi_secrets.h"
 
 #include <std_msgs/msg/string.h>
-// custom messages types for optimized communication (not working yet)
-// #include <../extra_packages/power_board_msgs/msg/ina219.h>
-// #include <../extra_packages/power_board_msgs/msg/power_datas.h>
+#include <power_board_msgs/msg/power_datas.h>
 
 #include "main.hpp"
 
@@ -41,12 +41,10 @@ const float adcResolution = (float) pow(2, resolution) - 1; // 12 bit resolution
 const float refVoltage = 3.3; // Volts
 const float zeroCurrentVoltage = 2.5; // Output voltage at 0A from ACS711
 const float sensitivity = 0.045; // 45mV per Amp
-
-// SHT31 sensor (temperature)
-// Adafruit_SHT31 sts = Adafruit_SHT31();
+esp_adc_cal_characteristics_t adc_chars;
 
 /* ROS related variables*/
-std_msgs__msg__String dataMsg;
+power_board_msgs__msg__PowerDatas dataMsg;
 rcl_publisher_t dataPublisher;
 rcl_timer_t publishTimer;
 rclc_support_t support;
@@ -83,72 +81,44 @@ bool safePublish(rcl_publisher_t* publisher, void* msg, const char* publisher_na
 }
 
 void publishData(rcl_timer_t * timer, int64_t last_call_time){
-  char final_string[512] = "";
+  builtin_interfaces__msg__Time stamp;
+  RCSOFTCHECK(rmw_uros_sync_session(1000));
+  uint64_t millis = rmw_uros_epoch_millis();
+  stamp.sec = millis / 1000;
+  stamp.nanosec = (millis % 1000) * 1000000;
 
+  dataMsg.timestamp = stamp;
   // read ACS711 sensor data (total current)
   uint16_t adcValue = analogRead(ACS_PIN);
   float voltage = refVoltage * adcValue / adcResolution;
   float currentACS  = (voltage - zeroCurrentVoltage) / sensitivity; // 45mV per Amp
+  dataMsg.tot_current_a = currentACS;
 
   // read STS30 temperature data
   float temperature = readTemperature();
-
-  snprintf(final_string, sizeof(final_string),
-         "[POWER BOARD]: Total Current=%.2fA, Temp=%.2fC\n",
-         currentACS, temperature);
+  dataMsg.temp = temperature;
 
   // read INA219 sensors datas
+  // Assign labels (hardcoded or from a lookup table)
+  const char *labels[NUM_SENS] = {"", "Jetson", "Lidar", "Router", "Lights", ""};
   for (uint8_t i = 0; i < NUM_SENS; i++) {
     float busV    = sensors[i]->getBusVoltage_V();
     float current = sensors[i]->getCurrent_mA();
     float power   = sensors[i]->getPower_mW();
     float shuntmV = sensors[i]->getShuntVoltage_mV();
     float loadV = busV + (shuntmV / 1000);
+    dataMsg.ina_sensors[i].bus_v = (float) busV;
+    dataMsg.ina_sensors[i].current_ma = (float) current;
+    dataMsg.ina_sensors[i].power_mw = (float) power;
+    dataMsg.ina_sensors[i].load_v = (float) loadV;
 
-    char buffer[128];
-    String nameLabel;
-    String values;
-    switch (i)
-    {
-    case 0:
-      nameLabel = "Ouster Lidar: ";
-      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
-      break;
-    case 1:
-      nameLabel = "Jetson: ";
-      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
-      break;
-    case 2:
-      // +16V not used
-      nameLabel = "";
-      values = "";
-      break;
-    case 3:
-      nameLabel = "Router: ";
-      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
-      break;
-    case 4:
-      nameLabel = "Lights: ";
-      values = String(busV) + "V, " + String(current) + "mA, " + String(power) + "mW\n";
-      break;
-    case 5:
-      // +5V not used
-      nameLabel = "";
-      values = "";
-      break;
-    default:
-      nameLabel = "";
-      values = "";
-      break;
-    }
-    snprintf(buffer, sizeof(buffer), "%s%s", nameLabel.c_str(), values.c_str());
-    strncat(final_string, buffer, sizeof(final_string) - strlen(final_string) - 1);
+    // Set label
+    rosidl_runtime_c__String__init(&dataMsg.ina_sensors[i].label);
+    rosidl_runtime_c__String__assign(&dataMsg.ina_sensors[i].label, labels[i]);
   }
-
-  snprintf(dataMsg.data.data, dataMsg.data.capacity, "%s", final_string);
-  dataMsg.data.size = strlen(dataMsg.data.data);
   safePublish(&dataPublisher, &dataMsg, "dataPublisher");
 }
+
 
 void microrosInit(){
   // in platformio.ini, set the board_microros_transport variable to wifi or serial depending on transport mode you want to use
@@ -157,14 +127,9 @@ void microrosInit(){
   allocator = rcl_get_default_allocator();
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator)); //create init_options
   RCCHECK(rclc_node_init_default(&node, "power_board_esp32_node", "", &support));// create node
- 
-  // Initialize the /power_board/state String message
-  dataMsg.data.data = (char *)malloc(512 * sizeof(char)); // Allocate memory for the string
-  dataMsg.data.size = 0;
-  dataMsg.data.capacity = 512;
 
   // // init publishers
-  RCCHECK(rclc_publisher_init_best_effort(&dataPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),"/power_board/state")); // create debug publisher
+  RCCHECK(rclc_publisher_init_best_effort(&dataPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(power_board_msgs, msg, PowerDatas),"/power_board/state")); // create test publisher
 
   // init timer
   RCCHECK(rclc_timer_init_default(&publishTimer, &support, RCL_MS_TO_NS(1000/PUBLISH_DATA_FREQUENCY), publishData));
@@ -181,12 +146,6 @@ void microrosCleanup(){
   rc = rcl_publisher_fini(&dataPublisher, &node);
   rc = rcl_node_fini(&node);
   rc = rclc_support_fini(&support);
-  if (dataMsg.data.data != NULL) {
-    free(dataMsg.data.data);
-    dataMsg.data.data = NULL;
-    dataMsg.data.size = 0;
-    dataMsg.data.capacity = 0;
-  }
 }
 
 void setup() {

@@ -9,6 +9,8 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 #include <Arduino.h>
+#include "rosidl_runtime_c/string.h"
+#include "rosidl_runtime_c/string_functions.h"
 
 #include "wifi_secrets.h"
 
