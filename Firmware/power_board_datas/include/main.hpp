@@ -11,6 +11,7 @@
 #include <Arduino.h>
 #include "rosidl_runtime_c/string.h"
 #include "rosidl_runtime_c/string_functions.h"
+#include "esp_adc_cal.h"
 
 #include "wifi_secrets.h"
 

@@ -10,6 +10,7 @@
 #include <Arduino.h>
 #include "rosidl_runtime_c/string.h"
 #include "rosidl_runtime_c/string_functions.h"
+#include "esp_adc_cal.h"
 
 #include "wifi_secrets.h"
 
@@ -41,6 +42,7 @@ const float adcResolution = (float) pow(2, resolution) - 1; // 12 bit resolution
 const float refVoltage = 3.3; // Volts
 const float zeroCurrentVoltage = 2.5; // Output voltage at 0A from ACS711
 const float sensitivity = 0.045; // 45mV per Amp
+const int nb_samples = 32; // multisampling over 32 values
 esp_adc_cal_characteristics_t adc_chars;
 
 /* ROS related variables*/
@@ -86,12 +88,16 @@ void publishData(rcl_timer_t * timer, int64_t last_call_time){
   uint64_t millis = rmw_uros_epoch_millis();
   stamp.sec = millis / 1000;
   stamp.nanosec = (millis % 1000) * 1000000;
-
   dataMsg.timestamp = stamp;
+
   // read ACS711 sensor data (total current)
-  uint16_t adcValue = analogRead(ACS_PIN);
-  float voltage = refVoltage * adcValue / adcResolution;
-  float currentACS  = (voltage - zeroCurrentVoltage) / sensitivity; // 45mV per Amp
+  uint32_t adcValue = 0;
+  for (int i = 0; i < nb_samples; i ++){
+    adcValue += analogRead(ACS_PIN); // multisampling
+  }
+  adcValue = adcValue / nb_samples;
+  uint32_t voltage = esp_adc_cal_raw_to_voltage(adcValue, &adc_chars);
+  float currentACS  = (voltage/1000.0f - zeroCurrentVoltage) / sensitivity; // 45mV per Amp
   dataMsg.tot_current_a = currentACS;
 
   // read STS30 temperature data
@@ -155,7 +161,12 @@ void setup() {
   pinMode(ACS_PIN, INPUT);
   analogReadResolution(12); // 12 bit resolution (0 - 4095)
   analogSetPinAttenuation(ACS_PIN, ADC_11db); // range 0-3.3V
-
+  esp_adc_cal_characterize(ADC_UNIT_1, // We are using ADC unit 1 channel 4
+                           ADC_ATTEN_DB_12, // ADC_ATTEN_DB_11 Behave the same as ADC_ATTEN_DB_12 but is deprecated, see adc_atten_t in adc_types.h
+                           ADC_WIDTH_BIT_12, // 12 bit resolution (0 - 4095)
+                           1100, // default Vref
+                           &adc_chars); // eFuse Vref calibration
+  
   microrosInit();
   delay(1000);
 
@@ -167,7 +178,7 @@ void setup() {
       sensors[i]->setCalibration_32V_2A();
     }
   }
-  Serial.println("INA219 ready.");
+  Serial.println("INA219s ready.");
 
 }
 
