@@ -69,12 +69,12 @@ services:
     command: udp4 --port 8890
     network_mode: "host"
 
-  ouster_lidar_driver:
-    image: "ouster-lidar:ros2-humble-cyclonedds"
-    container_name: ouster-ros2-container
-    privileged: true
-    network_mode: "host"
-    command: sensor_hostname:=192.168.1.31 ouster_ns:=ouster viz:=false timestamp_mode:="TIME_FROM_ROS_TIME"
+  # ouster_lidar_driver:
+  #   image: "ouster-lidar:ros2-humble-cyclonedds"
+  #   container_name: ouster-ros2-container
+  #   privileged: true
+  #   network_mode: "host"
+  #   command: sensor_hostname:=192.168.1.31 ouster_ns:=ouster viz:=false timestamp_mode:="TIME_FROM_ROS_TIME"
 
   zed2_driver:
     image: zed_ros2_l4t_36.3.0_sdk_5.0.2
@@ -96,3 +96,14 @@ services:
     stdin_open: true     # equivalent to -it
     tty: true            # equivalent to -it
     command: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 publish_tf:=false
+
+  robosense_lidar_ros:
+    build:
+      context: .
+      dockerfile: robosense-lidar-ros.Dockerfile
+    image: robosense-lidar-ros-image
+    container_name: robosense-lidar-ros-container
+    network_mode: "host"
+    stdin_open: true     # equivalent to -it
+    tty: true            # equivalent to -it
+    privileged: true

@@ -29,7 +29,7 @@ COPY ros2_ws ros2_ws/
 
 RUN cd ros2_ws && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build
+    colcon build --packages-select robot navigator data_collector
 
 ADD ros_entrypoint.sh /
 
