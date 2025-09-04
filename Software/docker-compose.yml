@@ -87,20 +87,22 @@ services:
     environment:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - DISPLAY=${DISPLAY}
+      - CYCLONEDDS_URI=file:///home/robotics/repos/AI.R-Autonomous_Robot/Software/cyclonedds-config.xml
     volumes:
       - /tmp/.X11-unix/:/tmp/.X11-unix
       - /dev:/dev
       - /dev/shm:/dev/shm
       - /usr/local/zed/resources/:/usr/local/zed/resources/
       - /usr/local/zed/settings/:/usr/local/zed/settings/
+      - ./cyclonedds-config.xml:/home/robotics/repos/AI.R-Autonomous_Robot/Software/cyclonedds-config.xml
     stdin_open: true     # equivalent to -it
     tty: true            # equivalent to -it
     command: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 publish_tf:=false
 
   robosense_lidar_ros:
-    build:
-      context: .
-      dockerfile: robosense-lidar-ros.Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: robosense-lidar-ros.Dockerfile
     image: robosense-lidar-ros-image
     container_name: robosense-lidar-ros-container
     network_mode: "host"

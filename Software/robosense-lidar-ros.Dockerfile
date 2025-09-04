@@ -17,15 +17,16 @@ WORKDIR /app
 
 # Copy robosense lidar driver files
 COPY cyclonedds-config.xml /app/
-COPY drivers/src/robosense_rslidar_msg drivers/src/robosense_rslidar_msg
-COPY drivers/src/robosense_rslidar_sdk drivers/src/robosense_rslidar_sdk
+COPY drivers/src/rslidar_msg drivers/src/rslidar_msg
+COPY drivers/src/rslidar_sdk drivers/src/rslidar_sdk
 
 # Build driver
 RUN cd drivers && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build --packages-select robosense_rslidar_msg robosense_rslidar_sdk
+    colcon build --packages-select rslidar_msg rslidar_sdk
 
 ADD drivers_entrypoint.sh /
+RUN chmod +x /drivers_entrypoint.sh
 
 ENTRYPOINT ["/drivers_entrypoint.sh"]
 
