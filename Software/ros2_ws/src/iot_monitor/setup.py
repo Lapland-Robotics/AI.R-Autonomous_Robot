@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "resource_monitor = iot_monitor.resource_monitor:main",
-            "power_monitor = iot_monitor.power_monitor:main"
+            "resource_monitor = iot_monitor.resource_monitor:main"
         ],
     },
 )
