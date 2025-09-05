@@ -18,7 +18,7 @@ class PowerMonitorNode(Node):
         os.makedirs(log_dir, exist_ok=True)
         now = time.strftime("%Y-%m-%d_%H-%M-%S")
         
-        log_file = os.path.join(log_dir+ "/power_log_" + now + '.log')
+        log_file = os.path.join(log_dir + now + '.log')
         self.file_logger = logging.getLogger('power_monitor_file')
         self.file_logger.setLevel(logging.INFO)
         fh = logging.FileHandler(log_file, mode='a')
