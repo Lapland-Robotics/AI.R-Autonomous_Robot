@@ -21,6 +21,18 @@ services:
     # command: echo "Autonomous Navigation container built, but not activated!"
     network_mode: "host"
 
+  data_collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robot-ros2-image
+    container_name: data-collector-container
+    volumes:
+      - /home/sohan-lapinamk/Desktop/Dataset:/home/sohan-lapinamk/Desktop/Dataset
+    stdin_open: true
+    network_mode: "host"
+    command: ros2 launch data_collector data_collector.launch.py
+
   # microros:
   #   build:
   #     context: .

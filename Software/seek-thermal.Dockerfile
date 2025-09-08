@@ -22,7 +22,7 @@ SHELL ["/bin/bash", "-c"]
 WORKDIR /app
 
 COPY cyclonedds-config.xml /app/
-COPY ros2_ws ros2_ws/
+COPY drivers/src/seek_thermal_camara ros2_ws/src/seek_thermal_camara/
 
 RUN cd ros2_ws && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
@@ -71,4 +71,4 @@ ENV PATH=/opt/seekthermal-sdk/${SDK_ARCH}/bin:${PATH}
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
 # Test command to verify SDK installation
-CMD ["ros2", "launch", "data_collector", "data_collector.launch.py"]
+CMD ["ros2", "run", "seek_thermal_camara", "thermal_camera_publisher"]
