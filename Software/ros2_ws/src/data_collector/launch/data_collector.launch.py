@@ -11,11 +11,5 @@ def generate_launch_description():
             executable='data_collector',
             name='data_collector',
             output='screen'
-        ), 
-        Node(
-            package='data_collector',
-            executable='thermal_camera_publisher',
-            name='thermal_camera_publisher',
-            output='screen'
         ),
     ])
