@@ -33,18 +33,6 @@ services:
     network_mode: "host"
     command: ros2 launch data_collector data_collector.launch.py
 
-  # microros-serial:
-  #   build:
-  #     context: .
-  #     dockerfile: microros.Dockerfile
-  #   container_name: microros-serial-container
-  #   tty: true
-  #   privileged: true
-  #   devices:
-  #     - /dev/ttyUSB0:/dev/ttyUSB0 
-  #   command: serial --dev /dev/ttyUSB0 # microros over serial
-  #   network_mode: "host"
-
   control-microros-udp:
     build:
       context: .
@@ -81,16 +69,29 @@ services:
     command: udp4 --port 8890
     network_mode: "host"
 
-  ouster_lidar_driver:
-    image: "ouster-lidar:ros2-humble-cyclonedds"
-    container_name: ouster-ros2-container
-    privileged: true
-    network_mode: "host"
-    command: sensor_hostname:=192.168.1.31 ouster_ns:=ouster viz:=false timestamp_mode:="TIME_FROM_ROS_TIME"
+  # microros-serial:
+  #   build:
+  #     context: .
+  #     dockerfile: microros.Dockerfile
+  #   container_name: microros-serial-container
+  #   tty: true
+  #   privileged: true
+  #   devices:
+  #     - /dev/ttyUSB0:/dev/ttyUSB0 
+  #   command: serial --dev /dev/ttyUSB0 # microros over serial
+  #   network_mode: "host"
+
+
+  # ouster_lidar_driver:
+  #   image: "ouster-lidar:ros2-humble-cyclonedds"
+  #   container_name: ouster-driver-container
+  #   privileged: true
+  #   network_mode: "host"
+  #   command: sensor_hostname:=192.168.1.31 ouster_ns:=ouster viz:=false timestamp_mode:="TIME_FROM_ROS_TIME"
 
   zed2_driver:
     image: zed_ros2_l4t_36.3.0_sdk_5.0.2
-    container_name: zed-ros2-container
+    container_name: zed-driver-container
     runtime: nvidia
     privileged: true
     network_mode: host
@@ -113,8 +114,8 @@ services:
     build:
       context: .
       dockerfile: seek-thermal.Dockerfile
-    image: seek-thermal-image
-    container_name: seek-thermal-container
+    image: seek-thermal-camara-image
+    container_name: seek-thermal-driver-container
     network_mode: "host"
     # args:
     #   ARCH: aarch64-linux-gnu # change architecture based on computer architecture, see Seek-Thermal SDK for available architectures
