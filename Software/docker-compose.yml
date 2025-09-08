@@ -33,50 +33,62 @@ services:
     network_mode: "host"
     command: ros2 launch data_collector data_collector.launch.py
 
-  # microros:
+  # microros-serial:
   #   build:
   #     context: .
   #     dockerfile: microros.Dockerfile
-  #   container_name: robot-microros-container
+  #   container_name: microros-serial-container
   #   tty: true
   #   privileged: true
   #   devices:
-  #     - /dev/ttyUSB0:/dev/ttyUSB0 # microros over serial
-  #   command: serial --dev /dev/ttyUSB0
+  #     - /dev/ttyUSB0:/dev/ttyUSB0 
+  #   command: serial --dev /dev/ttyUSB0 # microros over serial
   #   network_mode: "host"
 
-  # microros-udp:
-  #   build:
-  #     context: .
-  #     dockerfile: microros.Dockerfile
-  #   container_name: trigger-container
-  #   tty: true
-  #   privileged: true
-  #   ports:
-  #     - "8888:8888/udp"
-  #   command: udp4 --port 8888
-  #   network_mode: "host"
+  control-microros-udp:
+    build:
+      context: .
+      dockerfile: microros.Dockerfile
+    container_name: control-microros-udp-container
+    tty: true
+    privileged: true
+    ports:
+      - "8888:8888/udp"
+    command: udp4 --port 8888
+    network_mode: "host"
 
-  # gnss:
-  #   build:
-  #     context: .
-  #     dockerfile: microros.Dockerfile
-  #   container_name: robot-gnss-container
-  #   tty: true
-  #   privileged: true
-  #   devices:
-  #     - "/dev/ttyUSB1:/dev/ttyUSB1"
-  #   command: serial --dev /dev/ttyUSB1
-  #   network_mode: "host"
+  gnss-microros-udp:
+    build:
+      context: .
+      dockerfile: microros.Dockerfile
+    container_name: gnss-microros-udp-container
+    tty: true
+    privileged: true
+    ports:
+      - "8889:8889/udp"
+    command: udp4 --port 8889
+    network_mode: "host"
 
-  ouster_lidar:
+  util-microros-udp:
+    build:
+      context: .
+      dockerfile: microros.Dockerfile
+    container_name: util-microros-udp-container
+    tty: true
+    privileged: true
+    ports:
+      - "8890:8890/udp"
+    command: udp4 --port 8890
+    network_mode: "host"
+
+  ouster_lidar_driver:
     image: "ouster-lidar:ros2-humble-cyclonedds"
     container_name: ouster-ros2-container
     privileged: true
     network_mode: "host"
     command: sensor_hostname:=192.168.1.31 ouster_ns:=ouster viz:=false timestamp_mode:="TIME_FROM_ROS_TIME"
 
-  zed_ros2:
+  zed2_driver:
     image: zed_ros2_l4t_36.3.0_sdk_5.0.2
     container_name: zed-ros2-container
     runtime: nvidia
@@ -97,7 +109,7 @@ services:
     tty: true            # equivalent to -it
     command: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 publish_tf:=false
 
-  seek_thermal:
+  seek_thermal_driver:
     build:
       context: .
       dockerfile: seek-thermal.Dockerfile
