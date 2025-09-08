@@ -15,7 +15,7 @@
 #include "wifi_secrets.h"
 
 #include <std_msgs/msg/string.h>
-#include <power_board_msgs/msg/power_datas.h>
+#include <power_pcb_msgs/msg/power_datas.h>
 
 #include "main.hpp"
 
@@ -46,7 +46,7 @@ const int nb_samples = 32; // multisampling over 32 values
 esp_adc_cal_characteristics_t adc_chars;
 
 /* ROS related variables*/
-power_board_msgs__msg__PowerDatas dataMsg;
+power_pcb_msgs__msg__PowerDatas dataMsg;
 rcl_publisher_t dataPublisher;
 rcl_timer_t publishTimer;
 rclc_support_t support;
@@ -132,10 +132,10 @@ void microrosInit(){
   //  set_microros_serial_transports(Serial); // microros over serial
   allocator = rcl_get_default_allocator();
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator)); //create init_options
-  RCCHECK(rclc_node_init_default(&node, "power_board_esp32_node", "", &support));// create node
+  RCCHECK(rclc_node_init_default(&node, "power_pcb_esp32_node", "", &support));// create node
 
   // // init publishers
-  RCCHECK(rclc_publisher_init_best_effort(&dataPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(power_board_msgs, msg, PowerDatas),"/power_board/state")); // create test publisher
+  RCCHECK(rclc_publisher_init_best_effort(&dataPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(power_pcb_msgs, msg, PowerDatas),"/power_pcb/state")); // create test publisher
 
   // init timer
   RCCHECK(rclc_timer_init_default(&publishTimer, &support, RCL_MS_TO_NS(1000/PUBLISH_DATA_FREQUENCY), publishData));

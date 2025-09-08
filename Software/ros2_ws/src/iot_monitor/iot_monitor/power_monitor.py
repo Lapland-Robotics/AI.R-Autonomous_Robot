@@ -9,7 +9,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy
 
 from std_msgs.msg import String
-from power_board_msgs.msg import PowerDatas
+from power_pcb_msgs.msg import PowerDatas
 
 class PowerMonitorNode(Node):
 
@@ -27,7 +27,7 @@ class PowerMonitorNode(Node):
         fh.setFormatter(logging.Formatter('%(asctime)s  %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
         self.file_logger.addHandler(fh)
         qos_profile = QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
-        self.subscription = self.create_subscription(PowerDatas, '/power_board/state', self.listener_callback, qos_profile)
+        self.subscription = self.create_subscription(PowerDatas, '/power_pcb/state', self.listener_callback, qos_profile)
 
 
     def listener_callback(self, msg):
