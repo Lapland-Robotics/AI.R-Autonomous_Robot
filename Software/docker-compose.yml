@@ -33,6 +33,18 @@ services:
     network_mode: "host"
     command: ros2 launch data_collector data_collector.launch.py
 
+  iot_monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iot-robot-image
+    container_name: iot-robot-container
+    volumes:
+      - /home/sohan-lapinamk/repos/Autonomous_Robot/Software/ros2_ws/src/iot_monitor/logs:/app/src/iot_monitor/logs
+    stdin_open: true
+    network_mode: "host"
+    command: ros2 run iot_monitor power_monitor
+
   control-microros-udp:
     build:
       context: .
