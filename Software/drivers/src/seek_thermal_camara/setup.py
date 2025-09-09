@@ -1,9 +1,6 @@
 from setuptools import find_packages, setup
-import os
 
-package_name = 'data_collector'
-launch_file_path = os.path.join(os.path.dirname(__file__), 'launch')
-
+package_name = 'seek_thermal_camara'
 
 setup(
     name=package_name,
@@ -13,10 +10,6 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', 
-            [
-                os.path.join(launch_file_path, 'data_collector.launch.py'),
-            ]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -27,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "data_collector = data_collector.data_collector:main",
+            "thermal_camera_publisher = seek_thermal_camara.thermal_camera_publisher:main",
         ],
     },
 )

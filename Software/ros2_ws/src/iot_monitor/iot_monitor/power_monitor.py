@@ -9,6 +9,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy
 
 from std_msgs.msg import String
+from power_pcb_msgs.msg import PowerDatas
 
 class PowerMonitorNode(Node):
 
@@ -25,13 +26,58 @@ class PowerMonitorNode(Node):
         fh = logging.FileHandler(log_file, mode='a')
         fh.setFormatter(logging.Formatter('%(asctime)s  %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
         self.file_logger.addHandler(fh)
-        qos_profile = QoSProfile(depth=10, reliability=ReliabilityPolicy.SYSTEM_DEFAULT)
-        self.subscription = self.create_subscription(String, '/power_board/state', self.listener_callback, qos_profile)
+        qos_profile = QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
+        self.subscription = self.create_subscription(PowerDatas, '/power_pcb/state', self.listener_callback, qos_profile)
 
 
     def listener_callback(self, msg):
-        self.get_logger().info('power_pcb status: "%s"' % msg.data)
-        self.file_logger.info(msg)
+        log_message = (
+            f'[POWER PCB] '
+            f'temp : {msg.temp:.2f}°C, '
+            f'total current : {msg.tot_current_a:.2f}A, '
+            f'{msg.ina_sensors[1].label} : '
+            f'{msg.ina_sensors[1].bus_v:.2f}V, '
+            f'{msg.ina_sensors[1].current_ma:.2f}mA, '
+            f'{msg.ina_sensors[1].power_mw:.2f}mW; '
+            f'{msg.ina_sensors[2].label} : '
+            f'{msg.ina_sensors[2].bus_v:.2f}V, '
+            f'{msg.ina_sensors[2].current_ma:.2f}mA, '
+            f'{msg.ina_sensors[2].power_mw:.2f}mW; '
+            f'{msg.ina_sensors[3].label} : '
+            f'{msg.ina_sensors[3].bus_v:.2f}V, '
+            f'{msg.ina_sensors[3].current_ma:.2f}mA, '
+            f'{msg.ina_sensors[3].power_mw:.2f}mW; '
+            f'{msg.ina_sensors[4].label} : '
+            f'{msg.ina_sensors[4].bus_v:.2f}V, '
+            f'{msg.ina_sensors[4].current_ma:.2f}mA, '
+            f'{msg.ina_sensors[4].power_mw:.2f}mW; '
+        )
+        self.get_logger().info(log_message)
+        self.file_logger.info(log_message)
+
+    def powerDatas_to_string(self, msg) :
+        string = (
+            f'[POWER PCB] '
+            f'temp : {msg.temp}°C, '
+            f'total current : {msg.tot_current_a}A, '
+            f'{msg.ina_sensors[1].label} : '
+            f'{msg.ina_sensors[1].bus_v}V, '
+            f'{msg.ina_sensors[1].current_ma}mA, '
+            f'{msg.ina_sensors[1].power_mw}mW; '
+            f'{msg.ina_sensors[2].label} : '
+            f'{msg.ina_sensors[2].bus_v}V, '
+            f'{msg.ina_sensors[2].current_ma}mA, '
+            f'{msg.ina_sensors[2].power_mw}mW; '
+            f'{msg.ina_sensors[3].label} : '
+            f'{msg.ina_sensors[3].bus_v}V, '
+            f'{msg.ina_sensors[3].current_ma}mA, '
+            f'{msg.ina_sensors[3].power_mw}mW; '
+            f'{msg.ina_sensors[4].label} : '
+            f'{msg.ina_sensors[4].bus_v}V, '
+            f'{msg.ina_sensors[4].current_ma}mA, '
+            f'{msg.ina_sensors[4].power_mw}mW; '
+        )
+        return string
 
 def main(args=None):
     rclpy.init(args=args)

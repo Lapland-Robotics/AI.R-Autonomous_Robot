@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>iot_monitor</name>
+  <name>seek_thermal_camara</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="sohanjanaka101@gmail.com">sohan-lapinamk</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>
-  <depend>power_pcb_msgs</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
