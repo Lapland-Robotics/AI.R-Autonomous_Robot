@@ -25,10 +25,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: robot-ros2-image
+    image: data-collector-image
     container_name: data-collector-container
     volumes:
-      - /home/sohan-lapinamk/Desktop/Dataset:/home/sohan-lapinamk/Desktop/Dataset
+      - /home/robotics/Desktop/Dataset:/home/robotics/Desktop/Dataset
     stdin_open: true
     network_mode: "host"
     command: ros2 launch data_collector data_collector.launch.py
@@ -40,7 +40,7 @@ services:
     image: iot-robot-image
     container_name: iot-robot-container
     volumes:
-      - /home/sohan-lapinamk/repos/Autonomous_Robot/Software/ros2_ws/src/iot_monitor/logs:/app/src/iot_monitor/logs
+      - /home/robotics/repos/AI.R-Autonomous_Robot/Software/ros2_ws/src/iot_monitor/logs:/app/src/iot_monitor/logs
     stdin_open: true
     network_mode: "host"
     command: ros2 run iot_monitor power_monitor
@@ -135,9 +135,9 @@ services:
     privileged: true
 
   seek_thermal_driver:
-    build:
-      context: .
-      dockerfile: seek-thermal.Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: seek-thermal.Dockerfile
     image: seek-thermal-camara-image
     container_name: seek-thermal-driver-container
     network_mode: "host"

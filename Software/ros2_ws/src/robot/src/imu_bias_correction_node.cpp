@@ -73,8 +73,8 @@ private:
         bool stationary = (linear_x < 0.0001) && (angular_z < 0.0001);
 
         if (!has_stationary_reference_) {
-            RCLCPP_INFO(this->get_logger(), "Saving initial reference.");
             if (last_imu_msg_) {
+                RCLCPP_INFO(this->get_logger(), "Saving initial reference.");
                 tf2::fromMsg(last_imu_msg_->orientation, q_ref);
                 yaw_ref_ = getYawFromQuaternion(q_ref);
                 yaw_previous_ = yaw_ref_;

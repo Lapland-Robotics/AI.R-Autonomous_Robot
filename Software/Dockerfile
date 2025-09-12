@@ -16,6 +16,7 @@ RUN apt-get install -y ros-$ROS_DISTRO-laser-filters
 RUN apt-get install -y python3-pip
 RUN pip install pcl
 RUN pip install Pillow
+RUN pip install open3d
 
 RUN rm -rf /var/lib/apt/lists/*
 RUN echo 'source "/opt/ros/$ROS_DISTRO/setup.bash"' >> ~/.bashrc
@@ -33,7 +34,7 @@ COPY ros2_ws ros2_ws/
 RUN cd ros2_ws && \
     rm -rf build install log && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build --packages-select robot navigator data_collector
+    colcon build --packages-select power_pcb_msgs robot navigator data_collector iot_monitor
 
 ADD ros_entrypoint.sh /
 

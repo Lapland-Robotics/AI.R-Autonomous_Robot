@@ -16,8 +16,8 @@ amcl:
     global_frame_id: "map"
     lambda_short: 0.1
     laser_likelihood_max_dist: 4.0
-    laser_max_range: 10.0
-    laser_min_range: 0.3
+    laser_max_range: 100.0
+    laser_min_range: 0.4
     laser_model_type: "likelihood_field_prob"
     set_initial_pose: False # Use default initial pose (0, 0, 0)
     max_beams: 200
@@ -135,8 +135,8 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.2
-      yaw_goal_tolerance: 0.2
+      xy_goal_tolerance: 0.3
+      yaw_goal_tolerance: 0.4
     # MPPI Controller -- Model Predictive Path Integral Controller
     # https://docs.nav2.org/configuration/packages/configuring-mppic.html
     FollowPath:
@@ -153,7 +153,7 @@ controller_server:
       vx_max: 0.6
       vy_max: 0.0
       vx_min: -0.6
-      wz_max: 2.0
+      wz_max: 1.0 # reduce rotation speed from 2.0 to 1.0 because for better SLAM correction when using robosense lidar
       ax_max: 1.5
       ay_min: -0.0
       ay_max: 0.0
@@ -191,20 +191,20 @@ controller_server:
       # Constraint Critic parameters -- penalizes trajectories that violate kinematic constraints
       ConstraintCritic:
         enabled: true
-        cost_weight: 4.0
+        cost_weight: 5.0
         cost_power: 1
       # Goal Angle Critic parameters -- penalizes trajectories that do not align with the goal angle
       GoalAngleCritic:
         enabled: true
-        cost_weight: 3.0
+        cost_weight: 4.0
         cost_power: 1
         threshold_to_consider: 0.6
       # Goal Critic parameters -- penalizes trajectories that do not reach the goal
       GoalCritic:
         enabled: true
-        cost_weight: 17.0
+        cost_weight: 20.0
         cost_power: 1
-        threshold_to_consider: 1.
+        threshold_to_consider: 1.0
       # Obstacles Critic parameters -- penalizes trajectories that collide with obstacles
       # Note: if the weight are too high, the robot will not go in high cost area to reach the goal
       ObstaclesCritic:
@@ -260,8 +260,9 @@ controller_server:
       # Note: is the weight is too high, the robot will not go in reverse when it is optimal
       PreferForwardCritic:
         enabled: false
-        cost_weight: 4.0
-        cost_power: 1
+        # High cost when using robosense lidar because of reduced field of view (front only)
+        cost_weight: 100.0 
+        cost_power: 10
         threshold_to_consider: 1.0
       # Velocity Deadband Critic parameters -- penalizes trajectories that have velocities in the deadband
       VelocityDeadbandCritic:
@@ -444,8 +445,8 @@ velocity_smoother:
     smoothing_frequency: 40.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.6, 0.0, 2.0]
-    min_velocity: [-0.6, 0.0, -2.0]
+    max_velocity: [0.6, 0.0, 1.0] # reduce rotation speed from 2.0 to 1.0 because for better SLAM correction when using robosense lidar
+    min_velocity: [-0.6, 0.0, -1.0] # reduce rotation speed from 2.0 to 1.0 because for better SLAM correction when using robosense lidar
     deadband_velocity: [0.2, 0.0, 0.1]
     velocity_timeout: 1.0
     max_accel: [1.0, 0.0, 1.0]

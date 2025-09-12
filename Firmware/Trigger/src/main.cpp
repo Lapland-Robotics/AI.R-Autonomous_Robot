@@ -24,7 +24,7 @@ void microrosInit(){
   // set_microros_transports(); // microros over serial
   allocator = rcl_get_default_allocator();
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
-  RCCHECK(rclc_node_init_default(&node, "micro_ros_esp32_node", "", &support));
+  RCCHECK(rclc_node_init_default(&node, "trigger_esp32_node", "", &support));
   RCCHECK(rclc_publisher_init_best_effort(&publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool), "/trigger"));
 
   msg.data = false;
