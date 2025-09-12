@@ -1,4 +1,4 @@
-#include <Wire.h> // unused here but necessary for I2C communication (Adafruit_INA219)
+#include <Wire.h>
 #include <Adafruit_BusIO_Register.h>
 #include <Adafruit_INA219.h>
 #include <micro_ros_platformio.h>
@@ -21,9 +21,6 @@
 
 #define STS30_ADDR 0x44 // default I2C address of STS30
 
-unsigned long now = 0;
-unsigned long publish_data_LET = 0;
-
 // INA219 instances
 Adafruit_INA219 ina0(0x40), // +24V
                 ina1(0x41), // +19V
@@ -34,6 +31,7 @@ Adafruit_INA219 ina0(0x40), // +24V
 Adafruit_INA219* sensors[] = {&ina0,&ina1,&ina2,&ina3,&ina4,&ina5};
 const uint8_t NUM_SENS = sizeof(sensors)/sizeof(sensors[0]);
 const char* labels[]  = {"0x40","0x41","0x46","0x4F","0x44","0x45"}; // just for serial printing
+const char *labels[NUM_SENS] = {"", "Jetson", "Lidar", "Router", "Lights", ""};
 
 // ACS711 Viout
 const int ACS_PIN = 32; //(ADC1_CH4)
@@ -58,6 +56,7 @@ int safeRetryCount = 0;
 
 void errorLoop() {
   errorRetryCount++;
+  Serial.println("Entering error loop, restarting microros...");
   delay(1000);
   if (errorRetryCount > 5) {
     ESP.restart();
@@ -83,6 +82,14 @@ bool safePublish(rcl_publisher_t* publisher, void* msg, const char* publisher_na
 }
 
 void publishData(rcl_timer_t * timer, int64_t last_call_time){
+  // Ping agent to ensure connection is alive
+  if (rmw_uros_ping_agent(100, 1) != RMW_RET_OK) {
+    Serial.println("Agent lost. Reconnecting...");
+    microrosCleanup();
+    delay(1000);
+    microrosInit();
+  }
+
   builtin_interfaces__msg__Time stamp;
   RCSOFTCHECK(rmw_uros_sync_session(1000));
   uint64_t millis = rmw_uros_epoch_millis();
@@ -135,7 +142,7 @@ void microrosInit(){
   RCCHECK(rclc_node_init_default(&node, "power_pcb_esp32_node", "", &support));// create node
 
   // // init publishers
-  RCCHECK(rclc_publisher_init_best_effort(&dataPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(power_pcb_msgs, msg, PowerDatas),"/power_pcb/state")); // create test publisher
+  RCCHECK(rclc_publisher_init_best_effort(&dataPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(power_pcb_msgs, msg, PowerDatas),"/power_pcb/state"));
 
   // init timer
   RCCHECK(rclc_timer_init_default(&publishTimer, &support, RCL_MS_TO_NS(1000/PUBLISH_DATA_FREQUENCY), publishData));
@@ -143,6 +150,7 @@ void microrosInit(){
   // Initialize executor
   RCCHECK(rclc_executor_init(&ctrlCmdExecutor, &support.context, 2, &allocator));
   RCCHECK(rclc_executor_add_timer(&ctrlCmdExecutor, &publishTimer));
+  Serial.println("microros init done.");
 }
 
 void microrosCleanup(){
@@ -150,12 +158,17 @@ void microrosCleanup(){
   rc = rclc_executor_fini(&ctrlCmdExecutor);
   rc = rcl_timer_fini(&publishTimer);
   rc = rcl_publisher_fini(&dataPublisher, &node);
+  for (uint8_t i = 0; i < NUM_SENS; i++) {
+    rosidl_runtime_c__String__fini(&dataMsg.ina_sensors[i].label);
+  }
   rc = rcl_node_fini(&node);
   rc = rclc_support_fini(&support);
+  Serial.println("microros cleanup done.");
 }
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("Starting microros...");
   delay(100);
   // initialize ACS711 sensor
   pinMode(ACS_PIN, INPUT);
@@ -182,7 +195,7 @@ void setup() {
 
 }
 
-void loop() {
+void loop() {  
   rclc_executor_spin_some(&ctrlCmdExecutor, RCL_MS_TO_NS(100));
 }
 
