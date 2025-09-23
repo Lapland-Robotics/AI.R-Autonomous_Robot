@@ -31,7 +31,6 @@ Adafruit_INA219 ina0(0x40), // +24V
 Adafruit_INA219* sensors[] = {&ina0,&ina1,&ina2,&ina3,&ina4,&ina5};
 const uint8_t NUM_SENS = sizeof(sensors)/sizeof(sensors[0]);
 const char* labels[]  = {"0x40","0x41","0x46","0x4F","0x44","0x45"}; // just for serial printing
-const char *labels[NUM_SENS] = {"", "Jetson", "Lidar", "Router", "Lights", ""};
 
 // ACS711 Viout
 const int ACS_PIN = 32; //(ADC1_CH4)
