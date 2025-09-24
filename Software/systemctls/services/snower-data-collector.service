@@ -3,10 +3,9 @@ Description=Snower Data Collector Service
 After=multi-user.target
 
 [Service]
+EnvironmentFile=/etc/default/air_ar
 Type=simple
-User=robotics
-WorkingDirectory=/home/robotics/repos/AI.R-Autonomous_Robot/Software/systemctls/scripts
-ExecStart=/bin/bash -c 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && ./data_collector.sh'
+ExecStart=/bin/bash -c 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && .$AIR_AR_PATH/Software/systemctls/scripts/data_collector.sh'
 Restart=on-failure
 RestartSec=2
 StandardOutput=journal

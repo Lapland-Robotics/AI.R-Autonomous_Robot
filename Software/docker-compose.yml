@@ -28,7 +28,7 @@ services:
     image: data-collector-image
     container_name: data-collector-container
     volumes:
-      - /home/robotics/Desktop/Dataset:/home/robotics/Desktop/Dataset
+      - /home/$USER/Desktop/Dataset:/home/$USER/Desktop/Dataset
     stdin_open: true
     network_mode: "host"
     command: ros2 launch data_collector data_collector.launch.py
@@ -40,7 +40,7 @@ services:
     image: iot-robot-image
     container_name: iot-robot-container
     volumes:
-      - /home/robotics/repos/AI.R-Autonomous_Robot/Software/ros2_ws/src/iot_monitor/logs:/app/src/iot_monitor/logs
+      - ${AIR_AR_PATH}/Software/ros2_ws/src/iot_monitor/logs:/app/src/iot_monitor/logs
     stdin_open: true
     network_mode: "host"
     command: ros2 run iot_monitor power_monitor
@@ -111,14 +111,14 @@ services:
     environment:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - DISPLAY=${DISPLAY}
-      - CYCLONEDDS_URI=file:///home/robotics/repos/AI.R-Autonomous_Robot/Software/cyclonedds-config.xml
+      - CYCLONEDDS_URI=file://${AIR_AR_PATH}/Software/cyclonedds-config.xml
     volumes:
       - /tmp/.X11-unix/:/tmp/.X11-unix
       - /dev:/dev
       - /dev/shm:/dev/shm
       - /usr/local/zed/resources/:/usr/local/zed/resources/
       - /usr/local/zed/settings/:/usr/local/zed/settings/
-      - ./cyclonedds-config.xml:/home/robotics/repos/AI.R-Autonomous_Robot/Software/cyclonedds-config.xml
+      - ./cyclonedds-config.xml:${AIR_AR_PATH}/Software/cyclonedds-config.xml
     stdin_open: true     # equivalent to -it
     tty: true            # equivalent to -it
     command: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 publish_tf:=false
