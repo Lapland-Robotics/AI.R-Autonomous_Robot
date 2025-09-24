@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Add or update AIR_AR_PATH in ~/.bashrc
+# --- Set AIR_AR_PATH in ~/.bashrc ---
 if ! grep -q "export AIR_AR_PATH=" ~/.bashrc; 
 then
     echo "export AIR_AR_PATH=\"$(pwd)\"" >> ~/.bashrc
@@ -11,7 +11,7 @@ else
 fi
 export AIR_AR_PATH="$(pwd)"
 
-# Add or update AIR_AR_PATH and USER in /etc/default/air_ar
+# --- Set AIR_AR_PATH and USER in /etc/default/air_ar ---
 if [ ! -f /etc/default/air_ar ]; 
 then
     echo "AIR_AR_PATH=\"$(pwd)\"" | sudo tee /etc/default/air_ar > /dev/null
@@ -22,6 +22,26 @@ else
     sudo sed -i "s|^USER=.*|USER=\"$(whoami)\"|" /etc/default/air_ar
     echo "AIR_AR_PATH and USER updated in /etc/default/air_ar"
 fi
+
+# --- Create or update .env file for Docker Compose ---
+DOCKER_ENV_FILE="$AIR_AR_PATH/Software/.env"
+mkdir -p "$AIR_AR_PATH/Software"
+
+# Update existing keys or append if missing
+update_env_var() {
+    local key="$1"
+    local value="$2"
+    if grep -q "^$key=" "$DOCKER_ENV_FILE" 2>/dev/null; then
+        sed -i "s|^$key=.*|$key=$value|" "$DOCKER_ENV_FILE"
+    else
+        echo "$key=$value" >> "$DOCKER_ENV_FILE"
+    fi
+}
+
+update_env_var "AIR_AR_PATH" "$AIR_AR_PATH"
+update_env_var "USER" "$(whoami)"
+
+echo ".env file created/updated at $DOCKER_ENV_FILE with AIR_AR_PATH and USER"
 
 # Copy the systemd service file to the system directory
 sudo cp -r Software/systemctls/services/* /etc/systemd/system/
