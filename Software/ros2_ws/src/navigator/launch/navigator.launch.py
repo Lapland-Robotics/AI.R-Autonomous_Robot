@@ -65,8 +65,8 @@ def generate_launch_description():
             parameters=[{
                 'min_height': -0.5,
                 'max_height': 0.2,
-                'range_min': 0.3,
-                'range_max': 10.00,
+                'range_min': 0.4,
+                'range_max': 150.00,
                 'scan_time': 0.1,
                 'angle_increment': 0.0123,     # ≈ 2π/512
                 'concurrency_level': 3

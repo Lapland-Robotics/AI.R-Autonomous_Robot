@@ -27,7 +27,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "thermal_camera_publisher = data_collector.thermal_camera_publisher:main",
             "data_collector = data_collector.data_collector:main",
         ],
     },

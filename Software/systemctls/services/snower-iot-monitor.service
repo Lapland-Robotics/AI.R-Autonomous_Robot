@@ -1,0 +1,17 @@
+[Unit]
+Description=Snower Data Collector Service
+After=multi-user.target
+
+[Service]
+EnvironmentFile=/etc/default/air_ar
+Type=simple
+ExecStart=/bin/bash -c 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && ./$AIR_AR_PATH/Software/systemctls/scripts/iot_monitor.sh'
+Restart=on-failure
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+Environment="LD_LIBRARY_PATH=/usr/local/lib"
+
+
+[Install]
+WantedBy=multi-user.target

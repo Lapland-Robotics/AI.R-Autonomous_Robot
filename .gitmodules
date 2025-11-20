@@ -4,3 +4,11 @@
 [submodule "Software/drivers/src/ouster-ros"]
 	path = Software/drivers/src/ouster-ros
 	url = https://github.com/Lapland-Robotics/ouster-ros
+[submodule "Software/drivers/src/robosense_rslidar_msg"]
+	path = Software/drivers/src/rslidar_msg
+	url = https://github.com/Lapland-Robotics/robosense_rslidar_msg.git
+	branch = snower
+[submodule "Software/drivers/src/robosense_rslidar_sdk"]
+	path = Software/drivers/src/rslidar_sdk
+	url = https://github.com/Lapland-Robotics/robosense_rslidar_sdk.git
+	branch = snower

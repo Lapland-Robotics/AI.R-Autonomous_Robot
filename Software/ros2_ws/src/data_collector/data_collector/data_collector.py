@@ -9,7 +9,7 @@ import sensor_msgs_py.point_cloud2 as pc2
 from datetime import datetime
 import numpy as np
 from PIL import Image
-import pcl
+import open3d as o3d
 
 class DataCollector(Node):
 
@@ -49,7 +49,7 @@ class DataCollector(Node):
 
     def gen_folder(self):
         srv = os.path.join("/", "home/robotics")
-        dataset_path = os.path.join(srv, "ATV/Dataset")
+        dataset_path = os.path.join(srv, "Desktop/Dataset")
         os.makedirs(dataset_path, exist_ok=True)
         
         now = datetime.now()
@@ -62,26 +62,28 @@ class DataCollector(Node):
 
     def save_point_cloud(self, msg: PointCloud2, fname: str):
         try:
-            # Extract points from the PointCloud2 message
+            # Extract XYZ points from PointCloud2
             points = list(pc2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True))
 
             if not points:
-               self.get_logger().warn("No points found in the point cloud message.")
-               return
-        
-            # Convert to a plain 2D numpy array of shape (N, 3) with dtype float32
-            pc_array = np.array([[p[0], p[1], p[2]] for p in points], dtype=np.float32)
+                self.get_logger().warn("No points found in the point cloud message.")
+                return
 
-            # Create a PCL point cloud object
-            pcl_cloud = pcl.PointCloud()
-            pcl_cloud.from_array(pc_array)
+            # Convert to (N, 3) numpy array in float64 and contiguous
+            pc_array = np.asarray([[p[0], p[1], p[2]] for p in points], dtype=np.float64)
+            pc_array = np.ascontiguousarray(pc_array)
 
-            # Save the PCL point cloud to a .pcl file
+            # Create Open3D point cloud
+            pcd = o3d.geometry.PointCloud()
+            pcd.points = o3d.utility.Vector3dVector(pc_array)
+
+            # Save as .pcd or .ply
             filename = os.path.join(self.save_dir, fname)
-            pcl.save(pcl_cloud, filename)
-            self.get_logger().info(f"Point cloud saved to {filename}")
+            o3d.io.write_point_cloud(filename, pcd)
+
+            self.get_logger().info(f"Point cloud saved to {fname}")
         except Exception as e:
-            self.get_logger().error(f'Error saving point cloud: {e}')     
+            self.get_logger().error(f'Error saving point cloud: {e}')
 
     def save_image(self, msg, fname):
         try:
@@ -138,7 +140,8 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
