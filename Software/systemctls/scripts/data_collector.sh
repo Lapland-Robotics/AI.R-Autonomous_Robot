@@ -2,7 +2,9 @@
 
 set -e # exit immediately on any command failure
 
-source /home/robotics/repos/AI.R-Autonomous_Robot/Software/systemctls/scripts/ros2_config.bash
-source /home/robotics/repos/AI.R-Autonomous_Robot/Software/ros2_ws/install/setup.bash
+export HOME=/home/$USER
+
+source $AIR_AR_PATH/Software/systemctls/scripts/ros2_config.bash
+source $AIR_AR_PATH/Software/ros2_ws/install/setup.bash
 
 ros2 launch data_collector data_collector.launch.py

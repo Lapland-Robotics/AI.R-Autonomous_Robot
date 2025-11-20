@@ -9,7 +9,6 @@ import sensor_msgs_py.point_cloud2 as pc2
 from datetime import datetime
 import numpy as np
 from PIL import Image
-import pcl
 import open3d as o3d
 
 class DataCollector(Node):

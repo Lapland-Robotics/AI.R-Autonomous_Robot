@@ -22,3 +22,6 @@ ros2_ws/src/*/.idea/
 
 # Ignoring Seek-Thermal SDK because it is confidential
 drivers/src/Seek_Thermal_SDK_4.4.2.20/
+
+# User specific (created with setup.sh)
+.env

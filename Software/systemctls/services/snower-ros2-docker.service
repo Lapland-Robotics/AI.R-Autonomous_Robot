@@ -4,10 +4,10 @@ After=multi-user.target
 Requires=docker.service
 
 [Service]
-WorkingDirectory=/home/robotics/repos/AI.R-Autonomous_Robot/Software
+EnvironmentFile=/etc/default/air_ar
 # ExecStartPre=/usr/bin/docker compose -f docker-compose.yml build
-ExecStart=/usr/bin/docker compose -f docker-compose.yml up
-ExecStop=/usr/bin/docker compose -f docker-compose.yml down
+ExecStart=/bin/bash -c '/usr/bin/docker compose -f "$AIR_AR_PATH/Software/docker-compose.yml" up'
+ExecStop=/bin/bash -c '/usr/bin/docker compose -f "$AIR_AR_PATH/Software/docker-compose.yml" down'
 Restart=on-failure
 RestartSec=2
 StandardOutput=journal

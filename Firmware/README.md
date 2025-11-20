@@ -1,85 +1,89 @@
-# Arduino for Microcontroller Interface (ESP32)
+# PlatformIO for Microcontroller Interface (ESP32)
 
 ## Directory Tree view
-
-This section describes the structure of the Firmware directory, which contains all microcontroller programs used in the robot system
-
+This section describes the structure of the Firmware directory, which contains all microcontroller programs used in the robot system.
+There is one PlatformIO project for each firmware.
 ```bash
-├── GNSS                        # SparkFun ZED-F9P GNSS module
-│   ├── zedf9p_esp32            # microcontroller program for ESP32 micromod
-│   │   ├── APK3.log            # log file for accuracy testing
-│   │   ├── secrets.h           # wifi credencial file. DO NOT COMMIT 
-│   │   └── zedf9p_esp32.ino    # arduino file
-│   └── zedf9p_ucenter          # python program for ucentral port serial data
-│       ├── gnss_publisher.py   # python program
-│       └── requirements.txt    # requirement dependencies for pip 
-├── Robots                      # main Microcontroller programs to control robots
-│   ├── MiniATV                 # main ESP32 program of the MiniATV
-│   └── Snower                  # Main ESP32 program of the Snower
-│       ├── RobotDriveControl.c # diff drive source file 
-│       ├── RobotDriveControl.h # diff drive header file 
-│       ├── Snower.ino          # main arduino program for Snower
-│       └── wifi_secrets.h      # wifi credencial file. DO NOT COMMIT 
-├── Trigger                     # trigger button for the dataset project
-│   ├── Trigger.ino             # arduino program for triger
-│   └── wifi_secrets.h          # wifi credencial file. DO NOT COMMIT 
-└── Ultrasonic                  # Ultrasonic sensor array module 
-    └── Ultrasonic.ino          # arduino program for Ultrasonic module
-
+├── GNSS                                # SparkFun ZED-F9P GNSS module
+│   ├── zedf9p_esp32                    # microcontroller program for ESP32 micromod
+│   │   ├── src                         # source folder
+│   │   │   └── main.cpp                # main program for ESP32 micromod
+│   │   ├── include                     # include folder
+│   │   │   ├── main.hpp                # main header for ESP32 micromod
+│   │   │   └── secret.h                # wifi credencial file. DO NOT COMMIT
+│   │   ├── APK3.log                    # log file for accuracy testing
+│   │   └── platformio.ini              # PlatformIO project configuration file 
+│   └── zedf9p_ucenter                  # python program for ucentral port serial data
+│       ├── gnss_publisher.py           # python program
+│       └── requirements.txt            # requirement dependencies for pip 
+├── power_pcb_datas                     # Microcontroller programs to publish datas from power PCB
+│   ├── src                             # source folder
+│   │   └── main.cpp                    # main program for power data publisher
+│   ├── include                         # include folder
+│   │   ├── main.hpp                    # main header for power data publisher
+│   │   └── wifi_secrets.h              # wifi credencial file. DO NOT COMMIT
+│   ├── extra_packages/power_pcb_msgs   # custom ROS message type to publish all datas at once
+│   └── platformio.ini                  # PlatformIO project configuration file 
+├── Robots                              # main Microcontroller programs to control robots
+│   ├── MiniATV                         # main ESP32 program of the MiniATV
+│   └── Snower                          # Main ESP32 program of the Snower
+│       ├── src                         # source folder
+│       │   ├── main.cpp                # main program for Snower
+│       │   └── RobotDriveControl.c     # diff drive source file 
+│       └── include                     # include folder
+│           ├── main.hpp                # main header
+│           ├── wifi_secrets.h          # wifi credencial file. DO NOT COMMIT
+│           └── RobotDriveControl.h     # diff drive header file 
+├── Trigger                             # trigger button for the dataset project
+│   ├── src                             # source folder
+│   │   └── main.cpp                    # main program for the button
+│   ├── include                         # include folder
+│   │   ├── main.hpp                    # main header for the button
+│   │   └── wifi_secrets.h              # wifi credencial file. DO NOT COMMIT
+│   └── platformio.ini                  # PlatformIO project configuration file
+└── Ultrasonic                          # Ultrasonic sensor array module 
+    ├── src                             # source folder
+    │   └── main.cpp                    # main program for Ultrasonic module
+    └── platformio.ini                  # PlatformIO project configuration file
 ```
 
 ## Prevent Committing Credentials
-
 To ensure sensitive files are not accidentally committed, run the following commands to ignore modifications locally:
 ```bash
-git update-index --assume-unchanged Firmware/GNSS/zedf9p_esp32/secrets.h
-git update-index --assume-unchanged Firmware/Robots/Snower/wifi_secrets.h
+git update-index --assume-unchanged Firmware/GNSS/zedf9p_esp32/include/secrets.h
+git update-index --assume-unchanged Firmware/Robots/Snower/include/wifi_secrets.h
+git update-index --assume-unchanged Firmware/Robots/power_pcb_datas/include/wifi_secrets.h
+git update-index --assume-unchanged Firmware/Robots/Trigger/include/wifi_secrets.h
 ```
 
-## Install Arduino IDE
-You can use _Ubuntu Sofware_ -application for installing Arduino IDE
-or follow:
+## Install PlatformIO
+Follow this link for a tutorial on how to install PLatformIO IDE on VSCode :
+[https://platformio.org/install/ide?install=vscode](https://platformio.org/install/ide?install=vscode)
 
-[https://www.arduino.cc/en/guide/linux](https://www.arduino.cc/en/guide/linux)
-or:
-[https://ubuntu.com/tutorials/install-the-arduino-ide#1-overview](https://ubuntu.com/tutorials/install-the-arduino-ide#1-overview)
+If you only want to install PlatformIO Core, you can follow this link :
+[https://docs.platformio.org/en/latest/core/installation/index.html](https://docs.platformio.org/en/latest/core/installation/index.html)
 
-## Arduino IDE for ESP32 setup
-You can ignore this if you can upload code to ESP32 using Arduino IDE without any issue. 
-1. File -> Preferences
-2. Edit "Additional Board Manager URLs"
-```
-https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json, http://arduino.esp8266.com/stable/package_esp8266com_index.json
-```
-3. Tools -> Board -> Boards Manager. Install ESP32 (by Espressif Systems)
-4. Tools -> Board -> esp32 -> Select ESP32 Dev Module
-5. Install pip
-``` bash
-sudo apt install python3-pip
-```
-6. Install pyserial
-``` bash
-pip install pyserial
-```
-7. Now try to upload simple code to the ESP32 and test.
+For Linux users, follow this link to install udev rules for PlatformIO :
+[https://docs.platformio.org/en/latest/core/installation/udev-rules.html](https://docs.platformio.org/en/latest/core/installation/udev-rules.html)
 
-## Arduino IDE configuration 
-You have to make following changes in Arduino IDE to make code work:
-1. **Boards Manager -> esp32 by Expressif Systems (select 2.0.2 version)**. Otherwise you get an error in ledcSetup() and ledcAttachPin()
-2. in library manager, Search **ESP32TimerInterrupt (select 2.3.0 version)**
-3. Download zip file from this git repository, branch foxy [https://github.com/micro-ROS/micro_ros_arduino/tree/foxy](https://github.com/micro-ROS/micro_ros_arduino/tree/foxy)
-4. **Sketsch -> add Zip Library -> Select the Downloaded zip file**
+## Requirements 
+For `micro_ros_platformio` library (from [https://github.com/micro-ROS/micro_ros_platformio](https://github.com/micro-ROS/micro_ros_platformio)) :
 
+- PlatformIO Core version 6.1.0 or greater
+- PlatformIO needs  `git`, `cmake` and `pip3` to handle micro-ROS internal dependencies:
 
+  ```bash
+  apt install -y git cmake python3-pip
+  ```
 
-## Jetson Nano UART:
-Before You Start
-(Copied from some where nVidia Developer Forum) The stock Jetson Nano starts a console on the ttyTHS1 serial port at startup through a service. The script that starts the service is nvgetty.sh which launches getty. The script is located in /etc/systemd. While this does not conflict with the script presented here, consider disabling the console if you are using the serial port to avoid conflicts. Note that normal udev rules will be overridden by the console while the service is running. To disable the console:
-```
-$ systemctl stop nvgetty
-$ systemctl disable nvgetty
-$ udevadm trigger
-# You may want to reboot instead
-```
-> **Warning:**
-> This functionality has not been tested on the Jetson Nano Orin. However, it has been reported as not working on the Jetson Nano in the Lapland Robotics Projects.
+## Dependencies
+The `platformio.ini` files should list all dependencies to automatically setup the projects and flash the microcontrollers. Please remember that the first setup of a project can take a long time when the `micro_ros_platformio` librairy is used.
+
+For the _power_pcb_datas_ project, the ROS package in the _extra_packages_ folder must be built and sourced on your local machine in order to echo the `/power_pcb/state` topic.
+
+## Use PlatformIO
+Follow this link for a tutorial on how to use PlatformIO IDE :
+[https://docs.platformio.org/en/stable/integration/ide/vscode.html](https://docs.platformio.org/en/stable/integration/ide/vscode.html)
+
+Alternatively, you can use CLI commands. Follow this link for CLI documentation :
+[https://docs.platformio.org/en/latest/core/userguide/cmd_run.html](https://docs.platformio.org/en/latest/core/userguide/cmd_run.html)
