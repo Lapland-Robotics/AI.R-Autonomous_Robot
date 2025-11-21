@@ -46,19 +46,19 @@
         <origin xyz="0 0 0.24" />
     </joint>
     <link name="chassis_link">
-        <visual>
+        <!-- <visual>
             <origin xyz="0 0 0" />
             <geometry>
                 <box size="0.92 0.5 0.32" />
             </geometry>
             <material name="white" />
-        </visual>
+        </visual> -->
         <visual>
-            <origin xyz="0.3 0 0.31" />
+            <origin xyz="0 0 -0.245" rpy="0 0 0"/>
             <geometry>
-                <cylinder radius="0.05" length="0.3" />
+                <mesh filename="https://raw.githubusercontent.com/Lapland-Robotics/AI.R-Autonomous_Robot/documentation/3D%20Modeling/Snower_whole_3d.stl"/>
             </geometry>
-            <material name="white" />
+            <material name="orange" />
         </visual>
         <collision>
             <origin xyz="0 0 0" />
@@ -84,12 +84,12 @@
         <axis xyz="0 0 1" />
     </joint>
     <link name="left_back_wheel_link">
-        <visual>
+        <!-- <visual>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
             </geometry>
             <material name="black" />
-        </visual>
+        </visual> -->
         <collision>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
@@ -106,12 +106,12 @@
         <axis xyz="0 0 -1" />
     </joint>
     <link name="right_back_wheel_link">
-        <visual>
+        <!-- <visual>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
             </geometry>
             <material name="black" />
-        </visual>
+        </visual> -->
         <collision>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
@@ -128,12 +128,12 @@
         <axis xyz="0 0 1" />
     </joint>
     <link name="left_front_wheel_link">
-        <visual>
+        <!-- <visual>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
             </geometry>
             <material name="black" />
-        </visual>
+        </visual> -->
         <collision>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
@@ -150,12 +150,12 @@
         <axis xyz="0 0 -1" />
     </joint>
     <link name="right_front_wheel_link">
-        <visual>
+        <!-- <visual>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
             </geometry>
             <material name="black" />
-        </visual>
+        </visual> -->
         <collision>
             <geometry>
                 <cylinder radius="0.15" length="0.30" />
