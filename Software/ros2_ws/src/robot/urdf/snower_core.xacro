@@ -18,7 +18,7 @@
     </material>
 
     <material name="green">
-        <color rgba="0 1 0 1" />
+        <color rgba="0 0.5 0 1" />
     </material>
 
     <material name="black">
@@ -58,7 +58,7 @@
             <geometry>
                 <mesh filename="https://raw.githubusercontent.com/Lapland-Robotics/AI.R-Autonomous_Robot/documentation/3D%20Modeling/Snower_whole_3d.stl"/>
             </geometry>
-            <material name="orange" />
+            <material name="green" />
         </visual>
         <collision>
             <origin xyz="0 0 0" />
