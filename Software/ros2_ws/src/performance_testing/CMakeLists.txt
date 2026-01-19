@@ -17,6 +17,11 @@ ament_target_dependencies(latency_test_robot_node rclcpp std_msgs)
 install(TARGETS latency_test_robot_node
   DESTINATION lib/${PROJECT_NAME})
 
+add_executable(latency_test_remote_node src/latency_test_remote_node.cpp)
+ament_target_dependencies(latency_test_remote_node rclcpp std_msgs)
+install(TARGETS latency_test_remote_node
+  DESTINATION lib/${PROJECT_NAME})
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
