@@ -2,84 +2,94 @@ version: '3'
 
 services:
 
-  robot:
+  zenoh:
     build:
       context: .
       dockerfile: Dockerfile
     image: robot-ros2-image
-    container_name: robot-ros2-container
+    container_name: robot-zenoh-container
     stdin_open: true
+    command: ros2 run performance_testing latency_test_robot_node
     network_mode: "host"
 
-  nav2:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: robot-nav2-image
-    container_name: robot-nav2-container
-    command: ros2 launch navigator navigator.launch.py
-    # command: echo "Autonomous Navigation container built, but not activated!"
-    network_mode: "host"
+  # robot:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: robot-ros2-image
+  #   container_name: robot-ros2-container
+  #   stdin_open: true
+  #   network_mode: "host"
 
-  data_collector:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: data-collector-image
-    container_name: data-collector-container
-    volumes:
-      - /home/$USER/Desktop/Dataset:/home/$USER/Desktop/Dataset
-    stdin_open: true
-    network_mode: "host"
-    command: ros2 launch data_collector data_collector.launch.py
+  # nav2:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: robot-nav2-image
+  #   container_name: robot-nav2-container
+  #   command: ros2 launch navigator navigator.launch.py
+  #   # command: echo "Autonomous Navigation container built, but not activated!"
+  #   network_mode: "host"
 
-  iot_monitor:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: iot-robot-image
-    container_name: iot-robot-container
-    volumes:
-      - ${AIR_AR_PATH}/Software/ros2_ws/src/iot_monitor/logs:/app/src/iot_monitor/logs
-    stdin_open: true
-    network_mode: "host"
-    command: ros2 run iot_monitor power_monitor
+  # data_collector:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: data-collector-image
+  #   container_name: data-collector-container
+  #   volumes:
+  #     - /home/$USER/Desktop/Dataset:/home/$USER/Desktop/Dataset
+  #   stdin_open: true
+  #   network_mode: "host"
+  #   command: ros2 launch data_collector data_collector.launch.py
 
-  control-microros-udp:
-    build:
-      context: .
-      dockerfile: microros.Dockerfile
-    container_name: control-microros-udp-container
-    tty: true
-    privileged: true
-    ports:
-      - "8888:8888/udp"
-    command: udp4 --port 8888
-    network_mode: "host"
+  # iot_monitor:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: iot-robot-image
+  #   container_name: iot-robot-container
+  #   volumes:
+  #     - ${AIR_AR_PATH}/Software/ros2_ws/src/iot_monitor/logs:/app/src/iot_monitor/logs
+  #   stdin_open: true
+  #   network_mode: "host"
+  #   command: ros2 run iot_monitor power_monitor
 
-  gnss-microros-udp:
-    build:
-      context: .
-      dockerfile: microros.Dockerfile
-    container_name: gnss-microros-udp-container
-    tty: true
-    privileged: true
-    ports:
-      - "8889:8889/udp"
-    command: udp4 --port 8889
-    network_mode: "host"
+  # control-microros-udp:
+  #   build:
+  #     context: .
+  #     dockerfile: microros.Dockerfile
+  #   container_name: control-microros-udp-container
+  #   tty: true
+  #   privileged: true
+  #   ports:
+  #     - "8888:8888/udp"
+  #   command: udp4 --port 8888
+  #   network_mode: "host"
 
-  util-microros-udp:
-    build:
-      context: .
-      dockerfile: microros.Dockerfile
-    container_name: util-microros-udp-container
-    tty: true
-    privileged: true
-    ports:
-      - "8890:8890/udp"
-    command: udp4 --port 8890
-    network_mode: "host"
+  # gnss-microros-udp:
+  #   build:
+  #     context: .
+  #     dockerfile: microros.Dockerfile
+  #   container_name: gnss-microros-udp-container
+  #   tty: true
+  #   privileged: true
+  #   ports:
+  #     - "8889:8889/udp"
+  #   command: udp4 --port 8889
+  #   network_mode: "host"
+
+  # util-microros-udp:
+  #   build:
+  #     context: .
+  #     dockerfile: microros.Dockerfile
+  #   container_name: util-microros-udp-container
+  #   tty: true
+  #   privileged: true
+  #   ports:
+  #     - "8890:8890/udp"
+  #   command: udp4 --port 8890
+  #   network_mode: "host"
 
   # microros-serial:
   #   build:
@@ -100,53 +110,53 @@ services:
   #   network_mode: "host"
   #   command: sensor_hostname:=192.168.1.31 ouster_ns:=ouster viz:=false timestamp_mode:="TIME_FROM_ROS_TIME"
 
-  zed2_driver:
-    image: zed_ros2_l4t_36.3.0_sdk_5.0.2
-    container_name: zed-driver-container
-    runtime: nvidia
-    privileged: true
-    network_mode: host
-    ipc: host
-    # pid: host
-    environment:
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - DISPLAY=${DISPLAY}
-      - CYCLONEDDS_URI=file://${AIR_AR_PATH}/Software/cyclonedds-config.xml
-    volumes:
-      - /tmp/.X11-unix/:/tmp/.X11-unix
-      - /dev:/dev
-      - /dev/shm:/dev/shm
-      - /usr/local/zed/resources/:/usr/local/zed/resources/
-      - /usr/local/zed/settings/:/usr/local/zed/settings/
-      - ./cyclonedds-config.xml:${AIR_AR_PATH}/Software/cyclonedds-config.xml
-    stdin_open: true     # equivalent to -it
-    tty: true            # equivalent to -it
-    command: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 publish_tf:=false
+  # zed2_driver:
+  #   image: zed_ros2_l4t_36.3.0_sdk_5.0.2
+  #   container_name: zed-driver-container
+  #   runtime: nvidia
+  #   privileged: true
+  #   network_mode: host
+  #   ipc: host
+  #   # pid: host
+  #   environment:
+  #     - NVIDIA_DRIVER_CAPABILITIES=all
+  #     - DISPLAY=${DISPLAY}
+  #     - CYCLONEDDS_URI=file://${AIR_AR_PATH}/Software/cyclonedds-config.xml
+  #   volumes:
+  #     - /tmp/.X11-unix/:/tmp/.X11-unix
+  #     - /dev:/dev
+  #     - /dev/shm:/dev/shm
+  #     - /usr/local/zed/resources/:/usr/local/zed/resources/
+  #     - /usr/local/zed/settings/:/usr/local/zed/settings/
+  #     - ./cyclonedds-config.xml:${AIR_AR_PATH}/Software/cyclonedds-config.xml
+  #   stdin_open: true     # equivalent to -it
+  #   tty: true            # equivalent to -it
+  #   command: ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 publish_tf:=false
 
-  robosense_lidar_ros:
-    # build:
-    #   context: .
-    #   dockerfile: robosense-lidar-ros.Dockerfile
-    image: robosense-lidar-ros-image
-    container_name: robosense-lidar-ros-container
-    network_mode: "host"
-    stdin_open: true     # equivalent to -it
-    tty: true            # equivalent to -it
-    privileged: true
+  # robosense_lidar_ros:
+  #   # build:
+  #   #   context: .
+  #   #   dockerfile: robosense-lidar-ros.Dockerfile
+  #   image: robosense-lidar-ros-image
+  #   container_name: robosense-lidar-ros-container
+  #   network_mode: "host"
+  #   stdin_open: true     # equivalent to -it
+  #   tty: true            # equivalent to -it
+  #   privileged: true
 
-  seek_thermal_driver:
-    # build:
-    #   context: .
-    #   dockerfile: seek-thermal.Dockerfile
-    image: seek-thermal-camara-image
-    container_name: seek-thermal-driver-container
-    network_mode: "host"
-    # args:
-    #   ARCH: aarch64-linux-gnu # change architecture based on computer architecture, see Seek-Thermal SDK for available architectures
-    #   LD_LIBRARY_PATH: /usr/local/lib # set library path for Seek Thermal SDK
-    volumes:
-      # - /tmp/.X11-unix/:/tmp/.X11-unix
-      - /dev:/dev
-    stdin_open: true     # equivalent to -it
-    tty: true            # equivalent to -it
-    privileged: true
+  # seek_thermal_driver:
+  #   # build:
+  #   #   context: .
+  #   #   dockerfile: seek-thermal.Dockerfile
+  #   image: seek-thermal-camara-image
+  #   container_name: seek-thermal-driver-container
+  #   network_mode: "host"
+  #   # args:
+  #   #   ARCH: aarch64-linux-gnu # change architecture based on computer architecture, see Seek-Thermal SDK for available architectures
+  #   #   LD_LIBRARY_PATH: /usr/local/lib # set library path for Seek Thermal SDK
+  #   volumes:
+  #     # - /tmp/.X11-unix/:/tmp/.X11-unix
+  #     - /dev:/dev
+  #   stdin_open: true     # equivalent to -it
+  #   tty: true            # equivalent to -it
+  #   privileged: true
