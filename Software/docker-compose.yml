@@ -8,6 +8,11 @@ services:
       dockerfile: zenoh.Dockerfile
     image: robot-zenoh-image
     container_name: robot-zenoh-container
+    environment:
+      RMW_IMPLEMENTATION: rmw_zenoh_cpp
+      ZENOH_ROUTER_CONFIG_URI: /app/zenoh-router-config.json5
+    volumes:
+      - ./zenoh-router-config.json5:/app/zenoh-router-config.json5:ro
     stdin_open: true
     command: ros2 run rmw_zenoh_cpp rmw_zenohd
     network_mode: "host"

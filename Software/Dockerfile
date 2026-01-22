@@ -27,7 +27,6 @@ SHELL ["/bin/bash", "-c"]
 
 WORKDIR /app
 
-COPY zenoh-router-config.json5 /app/
 COPY ros2_ws ros2_ws/
 
 RUN cd ros2_ws && \
