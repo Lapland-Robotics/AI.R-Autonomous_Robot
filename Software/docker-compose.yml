@@ -5,11 +5,21 @@ services:
   zenoh:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: robot-ros2-image
+      dockerfile: zenoh.Dockerfile
+    image: robot-zenoh-image
     container_name: robot-zenoh-container
     stdin_open: true
-    command: ros2 run performance_testing latency_test_robot_node
+    command: ros2 run rmw_zenoh_cpp rmw_zenohd
+    network_mode: "host"
+
+  performance_test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robot-ros2-performance-test-image
+    container_name: robot-ros2-performance-test-container
+    stdin_open: true
+    command: ros2 run performance_testing latency_test_remote_node
     network_mode: "host"
 
   # robot:

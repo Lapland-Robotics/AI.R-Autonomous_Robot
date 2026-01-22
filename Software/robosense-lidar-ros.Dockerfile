@@ -2,21 +2,19 @@ FROM ros:humble
 
 # Install dependencies
 RUN apt-get update
-RUN apt-get install -y ros-$ROS_DISTRO-rmw-cyclonedds-cpp
+RUN apt-get install -y ros-$ROS_DISTRO-rmw-zenoh-cpp
 RUN apt-get install -y  libpcap-dev
 
 RUN rm -rf /var/lib/apt/lists/*
 
 # ROS setup
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-ENV CYCLONEDDS_URI=file:///app/cyclonedds-config.xml
+ENV RMW_IMPLEMENTATION=rmw_zenoh_cpp
 
 SHELL ["/bin/bash", "-c"]
 
 WORKDIR /app
 
 # Copy robosense lidar driver files
-COPY cyclonedds-config.xml /app/
 COPY drivers/src/rslidar_msg drivers/src/rslidar_msg
 COPY drivers/src/rslidar_sdk drivers/src/rslidar_sdk
 
