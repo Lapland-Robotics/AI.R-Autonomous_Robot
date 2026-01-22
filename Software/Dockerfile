@@ -33,7 +33,7 @@ COPY ros2_ws ros2_ws/
 RUN cd ros2_ws && \
     rm -rf build install log && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build --packages-select power_pcb_msgs robot navigator data_collector iot_monitor performance_testing
+    colcon build --packages-select power_pcb_msgs robot navigator data_collector iot_monitor performance_testing --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 ADD ros_entrypoint.sh /
 
