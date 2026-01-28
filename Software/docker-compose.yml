@@ -70,17 +70,19 @@ services:
   #   network_mode: "host"
   #   command: ros2 run iot_monitor power_monitor
 
-  # control-microros-udp:
-  #   build:
-  #     context: .
-  #     dockerfile: microros.Dockerfile
-  #   container_name: control-microros-udp-container
-  #   tty: true
-  #   privileged: true
-  #   ports:
-  #     - "8888:8888/udp"
-  #   command: udp4 --port 8888
-  #   network_mode: "host"
+  control-microros-udp:
+    build:
+      context: .
+      dockerfile: microros.Dockerfile
+    container_name: control-microros-udp-container
+    environment:
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp 
+    tty: true
+    privileged: true
+    ports:
+      - "8888:8888/udp"
+    command: udp4 --port 8888
+    network_mode: "host"
 
   # gnss-microros-udp:
   #   build:
