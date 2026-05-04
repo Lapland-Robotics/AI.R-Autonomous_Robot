@@ -4,16 +4,16 @@
     <joint name="base_to_gnss" type="fixed">
         <parent link="base_link" />
         <child link="gnss_link" />
-        <origin xyz="-0.41 0.2 0.413" />
+        <origin xyz="-0.41 0.16 0.413" />
     </joint>
     <link name="gnss_link">
-        <visual>
+        <!-- <visual>
             <origin xyz="0 0 0" />
             <geometry>
                 <box size="0.063 0.067 0.026" />
             </geometry>
             <material name="orange" />
-        </visual>
+        </visual> -->
         <collision>
             <origin xyz="0 0 0" />
             <geometry>

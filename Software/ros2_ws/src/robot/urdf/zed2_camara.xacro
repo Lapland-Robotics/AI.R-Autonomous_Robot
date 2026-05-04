@@ -5,16 +5,16 @@
     <joint name="base_to_zed2" type="fixed">
         <parent link="base_link" />
         <child link="zed_camera_link" />
-        <origin xyz="0.445 0 0.4165" />
+        <origin xyz="0.442 0 0.41" />
     </joint>
     <link name="zed_camera_link">
-        <visual>
+        <!-- <visual>
             <origin xyz="0 0 0" />
             <geometry>
                 <box size="0.030 0.175 0.033" />
             </geometry>
             <material name="orange" />
-        </visual>
+        </visual> -->
         <collision>
             <origin xyz="0 0 0" />
             <geometry>
