@@ -7,6 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     image: robot-ros2-image
+    volumes:
+      - ./ros2_ws/src/robot/config:/app/ros2_ws/src/robot/config:ro # change configuration without rebuilding the image
     container_name: robot-ros2-container
     stdin_open: true
     network_mode: "host"
@@ -17,6 +19,8 @@ services:
       dockerfile: Dockerfile
     image: robot-nav2-image
     container_name: robot-nav2-container
+    volumes:
+      - ./ros2_ws/src/navigator/param:/app/ros2_ws/src/navigator/param:ro # change parameters without rebuilding the image 
     command: ros2 launch navigator navigator.launch.py
     # command: echo "Autonomous Navigation container built, but not activated!"
     network_mode: "host"

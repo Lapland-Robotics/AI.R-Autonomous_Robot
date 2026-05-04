@@ -276,7 +276,7 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 20.0
+      update_frequency: 10.0 # robosense lidar at 10Hz
       publish_frequency: 5.0
       global_frame: odom
       robot_base_frame: base_link
@@ -303,9 +303,9 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 10.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 3.0
+          raytrace_max_range: 20.0
+          raytrace_min_range: 0.4
+          obstacle_max_range: 20.0
           obstacle_min_range: 0.0
       # Note: it is really important to set inflation_radius high enough so it sufficiently cover the map for the controller server
       inflation_layer:
@@ -325,8 +325,8 @@ global_costmap:
       use_sim_time: False  # was True
       robot_radius: 0.6
       resolution: 0.05
-      width: 10
-      height: 10
+      width: 50
+      height: 50
       track_unknown_space: true
       always_send_full_costmap: False
       plugins: ["static_layer", "denoise_layer", "obstacle_layer", "inflation_layer"]
@@ -349,9 +349,9 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 10.0
-          raytrace_min_range: 0.3
-          obstacle_max_range: 3.0
+          raytrace_max_range: 100.0
+          raytrace_min_range: 0.4
+          obstacle_max_range: 20.0
           obstacle_min_range: 0.0
       # Note: it is really important to set inflation_radius high enough so it sufficiently cover the map for the planner server
       inflation_layer:
