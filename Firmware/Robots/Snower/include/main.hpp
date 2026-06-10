@@ -28,6 +28,7 @@ extern "C"{
 #define MCEnablePin 21 //Motor Controller Enable Pin
 #define SpeedSensorLeftPin 32 //Left speed sensor
 #define SpeedSensorRightPin 33 //Right speed sensor
+#define ButtonPin 14 // Button pin to activate the robot without microros connection
  
 //Constants
 #define FREQ  10000  //AnalogWrite frequency
@@ -42,19 +43,29 @@ extern "C"{
 #define TIMER0_COUNT_FREQUENCY 1000000 // Timer0 count frequency
 #define PWM_SLOPE 340.00 // Slope of the linearization function (m)
 #define PWM_INTERCEPT -17.00 // Intercept of the linearization function (C)
-#define MIN_PWM 50 // Minimum PWM value to start the motors
+#define MIN_PWM 50 // Minimum PWM value to starRISINGt the motors
 #define MAX_PWM 255 // Maximum PWM value to start the motors
 #define RC_PWM_UPPER_THRESHOLD 1600  // Upper threshold for RC PWM
 #define RC_PWM_LOWER_THRESHOLD 1400  // Lower threshold for RC PWM
   
 /*ROS2 Constants*/
-#define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){errorLoop();}}
+#define RCCHECK(fn) { \
+  rcl_ret_t temp_rc = fn; \
+  if (temp_rc != RCL_RET_OK) { \
+    if (getButtonPressed() != HIGH) { /* Verification to prevent error loop if button is pressed */ \
+      errorLoop(); \
+    } \
+  } \
+} 
+
+// #define RCCHECK(fn) { rcl_ret_t temp_rRISINGc = fn; if((temp_rc != RCL_RET_OK) && (digitalRead(ButtonPin) != 1)){errorLoop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
  
 // Pulse counter units
 #define PCNT_LEFT_UNIT PCNT_UNIT_0
 #define PCNT_RIGHT_UNIT PCNT_UNIT_1
  
+bool getButtonPressed();
 void errorLoop();
 bool safePublish(rcl_publisher_t* publisher, void* msg, const char* publisher_name);
 boolean isRCActive();
