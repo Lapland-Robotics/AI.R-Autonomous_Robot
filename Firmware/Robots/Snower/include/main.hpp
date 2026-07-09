@@ -75,7 +75,7 @@ void IRAM_ATTR CH1_interrupt();
 void IRAM_ATTR CH2_interrupt();
 void publishSpeed(rcl_timer_t * timer, int64_t last_call_time);
 void setupPCNT(pcnt_unit_t unit, int pin);
-void microrosInit();
+void microrosInit(void * parameter);
 void microrosCleanup();
 double mapFloat(int x, double in_min, double in_max, double out_min, double out_max);
 void getRC();

@@ -16,7 +16,9 @@ extern "C"{
 #include "driver/pcnt.h"
 
 #include <main.hpp>
- 
+
+TaskHandle_t InitializationMicroROS;
+
 /* Time variables */
 unsigned long PreviousTime = 0; // Last iteration time in milli seconds [ms]
 unsigned long LastMCEnable = 0; // last enable motor controller time
@@ -94,7 +96,7 @@ void errorLoop() {
   }
   else {
     microrosCleanup();
-    microrosInit();
+    microrosInit(NULL);
   }
 }
 
@@ -223,7 +225,7 @@ void setupPCNT(pcnt_unit_t unit, int pin) {
   pcnt_counter_resume(unit);
 }
  
-void microrosInit(){
+void microrosInit(void * parameter) {
   // in platformio.ini, set the board_microros_transport variable to wifi or serial depending on transport mode you want to use
   set_microros_wifi_transports(WIFI_SSID, WIFI_PASSWORD, agent_ip, agent_port); // microros over wifi
   //  set_microros_serial_transports(Serial); // microros over serial
@@ -340,11 +342,6 @@ void microrosCleanup(){
   }
 }
 
-// Getter for the button state
-bool getButtonPressed() {
-  return ButtonPressed;
-}
-
 // Interrupt handler for the button state change
 void IRAM_ATTR InterruptHandler() {
   unsigned long nowMicros = micros();
@@ -361,6 +358,16 @@ void IRAM_ATTR InterruptHandler() {
 void setup() {
   // delay(3000); // wait for Jetson to start the services
   Serial.begin(115200);
+
+  // Assignement InitializationMicroROS to the core 0
+  xTaskCreatePinnedToCore(
+    microrosInit,                               // Task function
+    "Initialization Micro-ROS connection",      // Task name
+    10000,                                      // Stack size in words
+    NULL,                                       // Parameter
+    1,                                          // Priority
+    &InitializationMicroROS,                    // Task reference
+    0);                                         // Number of the core (0 or 1)
  
   //pin initialising
   pinMode(CH1RCPin, INPUT);
@@ -405,7 +412,7 @@ void setup() {
  
   cmdVelDiffDrive = createCommandVelocity();
  
-  microrosInit(); // microros initialize
+//   microrosInit(NULL); // microros initialize
 }
  
 double mapFloat(int x, double in_min, double in_max, double out_min, double out_max) {
