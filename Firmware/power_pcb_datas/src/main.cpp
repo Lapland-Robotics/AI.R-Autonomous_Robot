@@ -17,9 +17,13 @@
 #include <std_msgs/msg/string.h>
 #include <power_pcb_msgs/msg/power_datas.h>
 
+#include "esp_task_wdt.h"
+
 #include "main.hpp"
 
 #define STS30_ADDR 0x44 // default I2C address of STS30
+
+#define WDT_TIMEOUT 10 // watchdog timeout
 
 // INA219 instances
 Adafruit_INA219 ina0(0x40), // +24V
@@ -191,11 +195,14 @@ void setup() {
     }
   }
   Serial.println("INA219s ready.");
-
+  
+  esp_task_wdt_init(WDT_TIMEOUT, true);
+  esp_task_wdt_add(NULL); // add the current task to the watchdog
 }
 
-void loop() {  
+void loop() {
   rclc_executor_spin_some(&ctrlCmdExecutor, RCL_MS_TO_NS(100));
+  esp_task_wdt_reset(); // reset the watchdog timer
 }
 
 float readTemperature() {

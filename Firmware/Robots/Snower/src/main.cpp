@@ -16,7 +16,9 @@ extern "C"{
 #include "driver/pcnt.h"
 
 #include <main.hpp>
- 
+
+TaskHandle_t InitializationMicroROS;
+
 /* Time variables */
 unsigned long PreviousTime = 0; // Last iteration time in milli seconds [ms]
 unsigned long LastMCEnable = 0; // last enable motor controller time
@@ -76,6 +78,13 @@ const unsigned long DEBOUNCE_THRESHOLD_US = 5000; // microseconds
 const float DISTANCE_TO_TOOTH_RATIO = 0.86355;  // cm/it
 int errorRetryCount = 0;
 int safeRetryCount = 0;
+
+/* Control button is pressed */
+volatile bool ButtonPressed = false;
+volatile unsigned long LastButtonInterruptMicros = 0;
+
+// Indicates whether micro-ROS initialized successfully and the executor is usable
+bool microrosReady = false;
  
 void errorLoop() {
   errorRetryCount++;
@@ -87,10 +96,10 @@ void errorLoop() {
   }
   else {
     microrosCleanup();
-    microrosInit();
+    microrosInit(NULL);
   }
-}  
- 
+}
+
 bool safePublish(rcl_publisher_t* publisher, void* msg, const char* publisher_name) {
   rcl_ret_t rc = rcl_publish(publisher, msg, NULL);
   if (rc != RCL_RET_OK) {
@@ -216,14 +225,31 @@ void setupPCNT(pcnt_unit_t unit, int pin) {
   pcnt_counter_resume(unit);
 }
  
-void microrosInit(){
+void microrosInit(void * parameter) {
   // in platformio.ini, set the board_microros_transport variable to wifi or serial depending on transport mode you want to use
   set_microros_wifi_transports(WIFI_SSID, WIFI_PASSWORD, agent_ip, agent_port); // microros over wifi
   //  set_microros_serial_transports(Serial); // microros over serial
+
+  rcl_ret_t rc;
   allocator = rcl_get_default_allocator();
-  RCCHECK(rclc_support_init(&support, 0, NULL, &allocator)); //create init_options
-  RCCHECK(rclc_node_init_default(&node, "micro_ros_esp32_node", "", &support));// create node
- 
+  microrosReady = false; // pessimistic until all inits succeed
+
+  rc = rclc_support_init(&support, 0, NULL, &allocator); // create init_options
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+
+  rc = rclc_node_init_default(&node, "micro_ros_esp32_node", "", &support); // create node
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+
   // Initialize the /debug String message
   debugMsg.data.data = (char *)malloc(128 * sizeof(char)); // Allocate memory for the string
   debugMsg.data.size = 0;
@@ -231,22 +257,72 @@ void microrosInit(){
   // Initialize the speed sensor msgs
   speedLeft.data = 0.00;
   speedRight.data = 0.00;
- 
+
   // init subscribers
-  RCCHECK(rclc_subscription_init_default(&ctrlCmdSubscription, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),"/cmd_vel")); // use /cmd_vel_nav topic to disable smoothing and recovery
- 
+  rc = rclc_subscription_init_default(&ctrlCmdSubscription, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),"/cmd_vel"); // use /cmd_vel_nav topic to disable smoothing and recovery
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+
   // init publishers
-  RCCHECK(rclc_publisher_init_best_effort(&debugPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),"/debug")); // create debug publisher
-  RCCHECK(rclc_publisher_init_default(&speedLeftPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),"/speed/left")); // create left speed publisher
-  RCCHECK(rclc_publisher_init_default(&speedRightPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),"/speed/right")); // create right speed publisher
- 
+  rc = rclc_publisher_init_best_effort(&debugPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),"/debug"); // create debug publisher
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+  rc = rclc_publisher_init_default(&speedLeftPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),"/speed/left"); // create left speed publisher
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+  rc = rclc_publisher_init_default(&speedRightPublisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),"/speed/right"); // create right speed publisher
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+
   // init timer
-  RCCHECK(rclc_timer_init_default(&speedTimer, &support, RCL_MS_TO_NS(1000/SPEED_PUBLISHER_FREQUENCY), publishSpeed));
- 
+  rc = rclc_timer_init_default(&speedTimer, &support, RCL_MS_TO_NS(1000/SPEED_PUBLISHER_FREQUENCY), publishSpeed);
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+
   // Initialize executor
-  RCCHECK(rclc_executor_init(&ctrlCmdExecutor, &support.context, 2, &allocator));
-  RCCHECK(rclc_executor_add_subscription(&ctrlCmdExecutor, &ctrlCmdSubscription, &ctrlCmdMsg, &cmdVelCallback, ON_NEW_DATA));
-  RCCHECK(rclc_executor_add_timer(&ctrlCmdExecutor, &speedTimer));
+  rc = rclc_executor_init(&ctrlCmdExecutor, &support.context, 2, &allocator);
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+  rc = rclc_executor_add_subscription(&ctrlCmdExecutor, &ctrlCmdSubscription, &ctrlCmdMsg, &cmdVelCallback, ON_NEW_DATA);
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+  rc = rclc_executor_add_timer(&ctrlCmdExecutor, &speedTimer);
+  if (rc != RCL_RET_OK) {
+    if (!ButtonPressed) {
+      errorLoop();
+    }
+    return;
+  }
+
+  microrosReady = true;
 }
  
 void microrosCleanup(){
@@ -265,10 +341,33 @@ void microrosCleanup(){
     debugMsg.data.capacity = 0;
   }
 }
+
+// Interrupt handler for the button state change
+void IRAM_ATTR InterruptHandler() {
+  unsigned long nowMicros = micros();
+  if (nowMicros - LastButtonInterruptMicros > 200000) {
+    if (digitalRead(ButtonPin) == HIGH) {
+      ButtonPressed = true;
+    } else {
+      ButtonPressed = false;
+    }
+    LastButtonInterruptMicros = nowMicros;
+  }
+}
  
 void setup() {
   // delay(3000); // wait for Jetson to start the services
   Serial.begin(115200);
+
+  // Assignement InitializationMicroROS to the core 0
+  xTaskCreatePinnedToCore(
+    microrosInit,                               // Task function
+    "Initialization Micro-ROS connection",      // Task name
+    10000,                                      // Stack size in words
+    NULL,                                       // Parameter
+    1,                                          // Priority
+    &InitializationMicroROS,                    // Task reference
+    0);                                         // Number of the core (0 or 1)
  
   //pin initialising
   pinMode(CH1RCPin, INPUT);
@@ -278,6 +377,15 @@ void setup() {
   pinMode(MCEnablePin, OUTPUT);
   pinMode(SpeedSensorLeftPin, INPUT);
   pinMode(SpeedSensorRightPin, INPUT);
+  pinMode(ButtonPin, INPUT_PULLDOWN);
+
+  if (digitalRead(ButtonPin) == HIGH) {
+    ButtonPressed = true;
+  } else {
+    ButtonPressed = false;
+  }
+
+  attachInterrupt(digitalPinToInterrupt(ButtonPin), InterruptHandler, CHANGE);
  
   //Initialising PWM on ESP32
   ledcSetup(0, FREQ, RESOLUTION); // Channel 0 for MotorSpeedPWM1
@@ -304,7 +412,7 @@ void setup() {
  
   cmdVelDiffDrive = createCommandVelocity();
  
-  microrosInit(); // microros initialize
+//   microrosInit(NULL); // microros initialize
 }
  
 double mapFloat(int x, double in_min, double in_max, double out_min, double out_max) {
@@ -386,8 +494,7 @@ void driving() {
  
 }
  
-void loop() {
- 
+void loop() { 
   // General block of the loop
   unsigned long now = millis();
   if (now - General_block_LET >= (1000 / GENERAL_BLOCK_FREQUENCY)) {
@@ -422,5 +529,4 @@ void loop() {
 
   // Spin the executor to handle incoming messages
   rclc_executor_spin_some(&ctrlCmdExecutor, RCL_MS_TO_NS(100));
- 
 }
