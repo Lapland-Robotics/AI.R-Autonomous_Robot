@@ -26,7 +26,7 @@ unsigned long TimeOut = 50;  // control command time out
 unsigned long MCTimeout = 60000;  // motor controller time out
 unsigned long General_block_LET = 0; // General block last executed time
 unsigned long debug_publisher_LET = 0; // General block last executed time
-unsigned long speed_publisher_LET = 0; // General block last executed tim Exercises and Quizzese
+unsigned long speed_publisher_LET = 0; // General block last executed time
 
 /* ROS topics related variables*/
 std_msgs__msg__String debugMsg;
