@@ -56,7 +56,10 @@
         <visual>
             <origin xyz="0 0 -0.245" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="https://raw.githubusercontent.com/Lapland-Robotics/AI.R-Autonomous_Robot/documentation/3D%20Modeling/Snower_whole_3d.stl"/>
+                <!-- Absolute path ▼ -->
+                <!-- <mesh filename="https://raw.githubusercontent.com/Lapland-Robotics/AI.R-Autonomous_Robot/documentation/3D%20Modeling/Snower_whole_3d.stl"/> -->
+                <!-- Relative path ▼ -->
+                <mesh filename="package://robot/urdf/Snower_whole_3d.stl"/>
             </geometry>
             <material name="green" />
         </visual>
